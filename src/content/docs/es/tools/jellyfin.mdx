@@ -1,0 +1,85 @@
+---
+title: "Herramientas de Jellyfin"
+description: "Herramientas para consultar el estado del servidor Jellyfin, revisar actividad, buscar contenido multimedia y ver detalles de series."
+category: "tools"
+order: 2
+locale: "es"
+draft: false
+---
+
+
+Estas cuatro herramientas interactúan con el servidor multimedia Jellyfin para consultar estado, revisar registros de actividad, buscar en tu biblioteca multimedia e inspeccionar detalles de series de TV.
+
+---
+
+## server_status
+
+Resumen completo del servidor: información de Jellyfin, uso de disco, estadísticas por biblioteca (conteo de series/películas/episodios), sesiones de streaming activas y usuarios registrados.
+
+### Parámetros
+
+Esta herramienta no requiere parámetros.
+
+### Ejemplo de Uso
+
+> "¿Cuál es el estado actual de mi servidor multimedia?"
+
+---
+
+## activity_log
+
+Actividad reciente del servidor: quién vio qué, inicios de sesión, cambios en la biblioteca y otros eventos del servidor.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `limit` | number | No | Número de entradas a devolver. Por defecto `15`. |
+
+### Ejemplo de Uso
+
+> "Muéstrame las últimas 10 cosas que pasaron en Jellyfin."
+
+---
+
+## search_media
+
+Buscar o listar contenido en la biblioteca de Jellyfin. Omite `query` para listar todos los elementos de un tipo. Usa `offset` para paginar conjuntos de resultados grandes.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `query` | string | No | Término de búsqueda. Omitir para listar todos los elementos. |
+| `type` | string | No | Filtrar por tipo de contenido. Uno de: `Movie`, `Series`, `Episode`, `Audio`. |
+| `limit` | number | No | Número máximo de resultados a devolver. Por defecto `50`. |
+| `offset` | number | No | Saltar esta cantidad de resultados para paginación. Por defecto `0`. |
+
+### Ejemplo de Uso
+
+> "Lista todas las películas en mi biblioteca."
+
+> "Busca 'Breaking Bad' en mi biblioteca."
+
+> "Muéstrame los siguientes 50 resultados a partir del offset 50."
+
+---
+
+## show_details
+
+Obtener información detallada de una serie incluyendo temporadas y episodios. Para series grandes, usa `seasonNumber` para obtener una temporada a la vez, o `page`/`pageSize` para paginar episodios.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `showId` | string | Sí | ID del elemento en Jellyfin. |
+| `seasonNumber` | number | No | Devolver solo esta temporada (recomendado para series grandes). |
+| `page` | number | No | Número de página (comienza en 1). Por defecto `1`. |
+| `pageSize` | number | No | Episodios por página. Por defecto `50`. |
+
+### Ejemplo de Uso
+
+> "Muéstrame la lista de episodios de Breaking Bad temporada 3."
+
+> "¿Qué temporadas están disponibles de The Office?"

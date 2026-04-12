@@ -1,0 +1,147 @@
+---
+title: "Quick Start"
+description: "Get Mediabox MCP up and running in minutes with the interactive setup wizard."
+category: "getting-started"
+order: 3
+locale: "en"
+draft: false
+---
+
+The fastest way to get **Mediabox MCP** running is with the interactive setup wizard. One command handles everything -- from generating configuration files to starting the **Docker** stack.
+
+## Run the Setup Wizard
+
+```bash
+npx create-mediabox
+```
+
+This launches an interactive wizard that walks you through the entire setup process.
+
+## Wizard Steps
+
+### 1. Deployment Mode
+
+Choose how you want to deploy:
+
+| Mode | Description |
+|---|---|
+| **Local** | Services run on `localhost` with direct port access. Best for home network use. |
+| **VPS / Cloud server** | Caddy reverse proxy with automatic HTTPS via Let's Encrypt. Each service gets its own subdomain. |
+| **Local + Public access (Cloudflare Tunnel)** | Outbound tunnel through Cloudflare's network. No port forwarding needed. |
+
+### 2. Domain & Network (VPS and Tunnel modes only)
+
+- **Base domain** -- Your domain for the services (e.g., `media.example.com`)
+- **Let's Encrypt email** -- For automatic HTTPS certificates (VPS mode only)
+- **Cloudflare Tunnel token** -- From the Zero Trust dashboard (Tunnel mode only)
+
+### 3. Timezone
+
+The wizard auto-detects your timezone and lets you search/filter from the full IANA list. Used for scheduled tasks and media metadata.
+
+### 4. Media Storage Paths
+
+Configure where your media files will be stored:
+
+- **Movies path** (default: `./media/movies`)
+- **TV Shows path** (default: `./media/tv`)
+- **Anime path** (default: `./media/anime`)
+- **Music path** (default: `./media/music`)
+
+### 5. Service Credentials
+
+You will be asked for:
+
+- **qBittorrent password** -- At least 8 characters, used for the torrent client
+- **Jellyfin admin username** -- Default is `admin`
+- **Jellyfin admin password** -- At least 4 characters, for the media server admin account
+
+### 6. MCP Server Configuration
+
+- **MCP public URL** -- Auto-generated based on your domain (or `http://localhost:3000` for local mode)
+- **MCP auth secret** -- Auto-generated 32-character hex key for OAuth2
+- **Internal API key** -- Auto-generated key for service-to-service communication
+
+> Both secrets are auto-generated. You can accept the defaults unless you have a specific reason to change them.
+
+### 7. Optional Integrations
+
+**Telegram Bot** -- If enabled, you will be asked for:
+
+- **Telegram Bot Token** -- Get it from [@BotFather](https://t.me/BotFather)
+- **LLM provider** -- Choose between **OpenRouter** (recommended) or **Google Gemini**
+- **LLM API key** -- Your API key for the chosen provider (e.g., from [openrouter.ai](https://openrouter.ai) or [Google AI Studio](https://aistudio.google.com))
+- **OpenRouter model** -- Default is `openai/gpt-4o` (OpenRouter only)
+- **Allowed Telegram user IDs** -- Comma-separated list to restrict access (leave empty to allow all)
+
+**Bazarr** -- Optional automatic subtitle downloader. If enabled, adds a Bazarr container to the stack.
+
+## What Happens After Setup
+
+Once you complete the wizard:
+
+1. **Configuration files are generated** -- `.env`, `docker-compose.yml`, and service configs are created in your project directory
+2. **Docker containers start** -- All services are pulled and launched automatically
+3. **Services auto-configure** -- Jellyfin admin user is created, Sonarr/Radarr get root folders and download client configured, Prowlarr is synced with Sonarr/Radarr, and FlareSolverr is registered as an indexer proxy
+4. **MCP server starts** -- The AI tool server is ready to accept connections
+
+The wizard prints the URLs for each service once everything is running.
+
+## Required Post-Setup: Add Indexers in Prowlarr
+
+After the wizard finishes, **you must manually add indexers** (torrent trackers) in Prowlarr. Without indexers, Sonarr and Radarr cannot search for or download any content.
+
+### 1. Open Prowlarr
+
+Go to `http://localhost:9696` (or `https://prowlarr.your-domain.com` if using VPS/Tunnel mode). Log in with the Jellyfin admin credentials you set during the wizard.
+
+### 2. Add Indexers
+
+1. Navigate to **Indexers** > **Add Indexer**
+2. Search for your preferred torrent trackers (e.g., 1337x, RARBG, Nyaa for anime, etc.)
+3. Configure each indexer with any required credentials or settings
+4. **Save** each indexer
+
+### 3. Enable FlareSolverr on Indexers That Need It
+
+Some indexers use Cloudflare protection. For those:
+
+1. Go to **Indexers** > **Tags** and create a tag called `flaresolverr`
+2. Go to **Settings** > **Indexer Proxies** > edit the **FlareSolverr** proxy (already configured by the wizard)
+3. Add the `flaresolverr` tag to the proxy
+4. When adding indexers that require Cloudflare bypass, assign the same `flaresolverr` tag to them
+
+This tells Prowlarr to route those specific indexers through FlareSolverr.
+
+### 4. Verify Sync
+
+Once indexers are added, Prowlarr automatically syncs them to Sonarr and Radarr (this was configured by the wizard). You can verify by checking **Settings** > **Apps** in Prowlarr.
+
+## Connect Your AI Client
+
+Add the MCP server to your client's configuration:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "https://your-domain.com/mcp"
+    }
+  }
+}
+```
+
+Replace the URL with your `MCP_PUBLIC_URL` from the `.env` file. For local mode, use `http://localhost:3000/mcp`. OAuth2 authentication is handled automatically.
+
+## Verify the Setup
+
+After connecting your AI client and adding indexers, try a simple command:
+
+> "Search for the movie Tears of Steel"
+
+If working correctly, the AI will use the `movie_search` tool and return results from your configured indexers.
+
+## Next Steps
+
+- [Environment Variables](/docs/configuration/environment-variables) -- Fine-tune your configuration
+- [Manual Setup](/docs/getting-started/manual-setup) -- Set up without the wizard

@@ -1,0 +1,116 @@
+---
+title: "Arquitectura"
+description: "Descripcion general de la arquitectura del sistema Mediabox MCP -- servicios, red, transporte y dominios de herramientas."
+category: "reference"
+order: 1
+locale: "es"
+draft: false
+---
+
+Esta pagina describe la arquitectura de alto nivel de Mediabox MCP, incluyendo como se comunican los servicios a traves de la red **Docker**, como el **servidor MCP** gestiona las solicitudes y como los clientes interactuan con el sistema.
+
+## Vision General del Sistema
+
+Los **Clientes MCP** (Claude Desktop, Telegram, etc.) se conectan al **Servidor MCP** via OAuth2 + Streamable HTTP. El Servidor MCP realiza llamadas internas a todos los servicios backend dentro de la red Docker.
+
+### Flujo de Solicitudes
+
+> **Cliente** → Servidor MCP (:3000) → Servicios Backend → Volumenes Multimedia Compartidos
+
+### Servicios en el Stack
+
+| Capa | Servicios | Funcion |
+|------|-----------|---------|
+| **Gateway** | MCP Server (:3000) | Recibe solicitudes de clientes IA via OAuth2 / Streamable HTTP, orquesta todas las llamadas backend |
+| **Media** | Jellyfin (:8096) | Streaming multimedia, gestion de biblioteca, metadatos |
+| **Automatizacion** | Sonarr (:8989), Radarr (:7878) | Busqueda de series/peliculas, monitoreo, importacion |
+| **Indexacion** | Prowlarr (:9696), FlareSolverr (:8191) | Gestion de indexadores de torrents, bypass de Cloudflare |
+| **Descargas** | qBittorrent (:8085), PyLoad (:8000) | Descargas de torrents y archivos directos |
+| **Almacenamiento** | `/data/*`, `/downloads` | Biblioteca multimedia compartida y staging de descargas |
+
+## Servidor MCP
+
+El servidor MCP es el eje central que expone todas las capacidades de gestion multimedia a los clientes de IA. Se comunica con cada servicio backend a traves de sus APIs internas de Docker.
+
+### Stack Principal
+
+- **Express.js** -- framework de servidor HTTP
+- **Transporte Streamable HTTP** -- capa de transporte del protocolo MCP en el endpoint `/mcp`
+- **Autenticacion OAuth2** -- protege el endpoint; los tokens expiran despues de 24 horas (acceso) y 30 dias (refresco)
+- **Endpoint de salud** -- `/health` devuelve el estado del servidor
+
+### Dominios de Herramientas
+
+El servidor MCP proporciona **25 herramientas** organizadas en **6 dominios**:
+
+| Dominio | Herramientas | Servicios Utilizados | Descripcion |
+| --- | --- | --- | --- |
+| **Jellyfin** | 4 | Jellyfin | Estado del servidor, registros de actividad, busqueda de contenido, detalles de series |
+| **Library** | 4 | Jellyfin, sistema de archivos | Gestion de biblioteca, operaciones de archivos, renombrado de episodios, correccion de subtitulos |
+| **Sonarr** | 5 | Sonarr | Busqueda de series, monitoreo, lanzamientos, descargas |
+| **Radarr** | 5 | Radarr | Busqueda de peliculas, monitoreo, lanzamientos, descargas |
+| **Downloads** | 4 | PyLoad, qBittorrent, yt-dlp, aria2c | Agregar descargas, verificar estado, descargas directas, cancelar colas |
+| **Maintenance** | 3 | ffmpeg, sistema de archivos, qBittorrent | Optimizacion de medios, limpieza del servidor, seguimiento de trabajos |
+
+> El servidor MCP **no** expone Prowlarr, qBittorrent ni FlareSolverr como dominios de herramientas directos. En su lugar, interactua con ellos indirectamente a traves de las herramientas de Sonarr, Radarr y Downloads.
+
+### Gestion de Trabajos en Segundo Plano
+
+Las operaciones de larga duracion (movimiento de archivos, optimizacion de medios, conversion de subtitulos) se ejecutan como trabajos en segundo plano. El servidor MCP rastrea su progreso e informa el estado a traves de la herramienta `check_jobs`. Cada trabajo tiene un ID, porcentaje de progreso y tiempo estimado de finalizacion.
+
+## Red Docker
+
+Todos los servicios se ejecutan en la red Docker bridge `mediabox-net`. Los servicios se comunican usando los nombres de los contenedores como nombres de host:
+
+| Servicio | URL Interna |
+| --- | --- |
+| Jellyfin | `http://jellyfin:8096` |
+| MCP Server | `http://mcp-server:3000` |
+| Sonarr | `http://sonarr:8989` |
+| Radarr | `http://radarr:7878` |
+| qBittorrent | `http://qbittorrent:8085` |
+| PyLoad | `http://pyload:8000` |
+| Prowlarr | `http://prowlarr:9696` |
+| FlareSolverr | `http://flaresolverr:8191` |
+
+- **El trafico interno** permanece dentro de la red Docker
+- **El acceso externo** se controla segun el modo de despliegue (puertos locales, proxy inverso Caddy o Cloudflare Tunnel)
+- **Las API keys** se extraen de las configuraciones de los servicios durante la instalacion y se inyectan como variables de entorno
+
+## Volumenes de Medios
+
+El stack utiliza dos areas de volumenes separadas:
+
+### Biblioteca Multimedia (`/data`)
+
+Montado desde `./media/` en el host. Compartido entre Jellyfin, Sonarr, Radarr y el servidor MCP:
+
+| Ruta | Contenido | Gestionado Por |
+|------|-----------|----------------|
+| `/data/movies` | Peliculas | Radarr |
+| `/data/tv` | Series de TV | Sonarr |
+| `/data/anime` | Anime | Sonarr |
+| `/data/music` | Musica | -- |
+
+### Descargas (`/downloads`)
+
+Montado desde `./downloads/` en el host. Compartido entre qBittorrent, PyLoad y el servidor MCP:
+
+- qBittorrent y PyLoad descargan archivos aqui
+- Sonarr y Radarr importan desde aqui hacia la biblioteca multimedia
+- La herramienta `download_direct` del servidor MCP tambien guarda aqui antes de organizar
+
+## Flujo de Autenticacion
+
+El servidor MCP utiliza **OAuth2** para clientes externos. El flujo funciona de la siguiente manera:
+
+| Paso | Cliente | Servidor MCP |
+|------|---------|--------------|
+| 1 | Envia `POST /mcp` | Responde con `401` + metadatos OAuth2 (en `/.well-known/oauth-authorization-server`) |
+| 2 | Inicia autorizacion OAuth2 | Aprueba automaticamente y devuelve codigo de autorizacion (sin pagina de login) |
+| 3 | Intercambia codigo por tokens | Devuelve token de acceso (24h) + token de refresco (30 dias) |
+| 4 | Envia `POST /mcp` con Bearer token | Devuelve resultados de herramientas |
+
+El proveedor OAuth2 utiliza un almacen **en memoria** -- los tokens se pierden al reiniciar el servidor, lo que requiere re-autenticacion. Los clientes compatibles con MCP gestionan esto automaticamente.
+
+El **bot de Telegram** no utiliza OAuth2. Se autentica mediante la variable de entorno `INTERNAL_API_KEY` ya que se ejecuta dentro de la misma red Docker.

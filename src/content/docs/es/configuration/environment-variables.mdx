@@ -1,0 +1,111 @@
+---
+title: "Variables de Entorno"
+description: "Referencia completa de todas las variables de entorno disponibles para configurar Mediabox MCP."
+category: "configuration"
+order: 1
+locale: "es"
+draft: false
+---
+
+Toda la configuracion de Mediabox MCP se gestiona a traves de un unico archivo `.env` en la raiz del proyecto. Esta pagina documenta cada variable disponible.
+
+## Despliegue
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `DEPLOYMENT_MODE` | Si | `local` | Modo de despliegue: `local` o `vps`. |
+| `TZ` | No | `UTC` | Zona horaria para todos los servicios (por ejemplo, `America/Mexico_City`, `Europe/Madrid`). |
+
+## Dominio y SSL
+
+Estas variables son necesarias dependiendo del modo de despliegue seleccionado durante la configuracion.
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `BASE_DOMAIN` | Condicional | -- | Dominio para los servicios (por ejemplo, `media.ejemplo.com`). Requerido en modo `vps` y con Cloudflare Tunnel. |
+| `LETSENCRYPT_EMAIL` | Condicional | -- | Email para certificados SSL de Let's Encrypt. Requerido en modo `vps`. |
+| `CLOUDFLARE_TUNNEL_TOKEN` | Condicional | -- | Token de tunnel de Cloudflare del panel Zero Trust. Requerido cuando se usa Cloudflare Tunnel. |
+
+## Claves API de Servicios
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `JELLYFIN_API_KEY` | Si | Extraida en el primer arranque | Clave API de Jellyfin. Generada automaticamente por Jellyfin durante la configuracion inicial, luego extraida por el asistente. |
+| `SONARR_API_KEY` | Si | Extraida en el primer arranque | Clave API de Sonarr. Generada automaticamente por Sonarr en el primer arranque, extraida de `config/sonarr/config.xml`. |
+| `RADARR_API_KEY` | Si | Extraida en el primer arranque | Clave API de Radarr. Generada automaticamente por Radarr en el primer arranque, extraida de `config/radarr/config.xml`. |
+| `QBIT_PASSWORD` | Si | -- | Contrasena para la interfaz web de qBittorrent (usuario: `admin`). Minimo 8 caracteres. Establecida por el usuario durante el asistente. |
+
+## PyLoad
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `PYLOAD_USER` | No | `pyload` | Nombre de usuario para la interfaz web y autenticacion API de PyLoad. |
+| `PYLOAD_PASSWORD` | No | `pyload` | Contrasena para la interfaz web y autenticacion API de PyLoad. |
+
+## Servidor MCP
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `MCP_PUBLIC_URL` | Si | `http://localhost:3000` | URL publica del servidor MCP. Configurar con la URL de tu dominio al desplegar en modo VPS o Tunnel. |
+| `MCP_AUTH_SECRET` | Si | Generado automaticamente | Secreto hexadecimal de 32 caracteres usado para autenticacion OAuth2. Generado automaticamente por el asistente. |
+| `INTERNAL_API_KEY` | Si | Generado automaticamente | Clave API interna para comunicacion entre servicios (por ejemplo, bot de Telegram al servidor MCP). |
+
+## Integracion con Telegram (Opcional)
+
+Estas variables solo son necesarias si habilitas el bot de Telegram durante la configuracion.
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `TELEGRAM_BOT_TOKEN` | Condicional | -- | Token del bot obtenido de [@BotFather](https://t.me/BotFather). Requerido para habilitar el bot de Telegram. |
+| `ALLOWED_TELEGRAM_USERS` | No | -- | Lista separada por comas de IDs de usuario de Telegram autorizados para interactuar con el bot. Dejar vacio para permitir todos los usuarios. |
+
+## Proveedor de LLM (Opcional)
+
+Estas variables configuran el LLM usado por el **bot de Telegram** para interpretar comandos en lenguaje natural y llamar a las herramientas MCP.
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `LLM_PROVIDER` | Condicional | -- | Proveedor de LLM para el bot de Telegram. Soportados: `openrouter`, `google`. Requerido si el bot de Telegram esta habilitado. |
+| `LLM_MODEL` | No | `openai/gpt-4o` | Identificador del modelo (solo para OpenRouter). Ejemplos: `openai/gpt-4o`, `anthropic/claude-sonnet-4`. |
+| `OPENROUTER_API_KEY` | Condicional | -- | Clave API de OpenRouter. Requerida cuando `LLM_PROVIDER=openrouter`. |
+| `GOOGLE_AI_API_KEY` | Condicional | -- | Clave API de Google AI (Gemini). Requerida cuando `LLM_PROVIDER=google`. |
+
+## Ejemplo de Archivo `.env`
+
+```env
+# Despliegue
+DEPLOYMENT_MODE=local
+TZ=America/Mexico_City
+
+# Dominio (descomentar para modo VPS)
+# BASE_DOMAIN=media.ejemplo.com
+# LETSENCRYPT_EMAIL=admin@ejemplo.com
+
+# Claves API de servicios (extraidas despues del primer arranque)
+JELLYFIN_API_KEY=
+SONARR_API_KEY=
+RADARR_API_KEY=
+QBIT_PASSWORD=tu-contrasena-segura
+
+# PyLoad
+PYLOAD_USER=pyload
+PYLOAD_PASSWORD=pyload
+
+# Servidor MCP
+MCP_PUBLIC_URL=http://localhost:3000
+MCP_AUTH_SECRET=
+INTERNAL_API_KEY=
+
+# Telegram (opcional)
+# TELEGRAM_BOT_TOKEN=123456:ABC-DEF
+# LLM_PROVIDER=openrouter
+# LLM_MODEL=openai/gpt-4o
+# OPENROUTER_API_KEY=sk-or-...
+# ALLOWED_TELEGRAM_USERS=12345678,87654321
+```
+
+## Notas
+
+- Las claves API de Jellyfin, Sonarr y Radarr son **generadas automaticamente por cada servicio** en el primer arranque. El asistente de configuracion las extrae automaticamente. Para la [configuracion manual](/es/docs/getting-started/manual-setup), extraelas de los archivos XML de configuracion.
+- `MCP_AUTH_SECRET` e `INTERNAL_API_KEY` se generan automaticamente como cadenas hexadecimales de 32 caracteres por el asistente. Para configuracion manual, generalos con: `openssl rand -hex 32`
+- Despues de cambiar cualquier variable, recrea los contenedores afectados: `docker compose up -d --force-recreate <servicio>`

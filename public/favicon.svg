@@ -1,0 +1,33 @@
+<svg viewBox="50 30 400 460" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="topBevel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2ec4a6"/>
+      <stop offset="100%" stop-color="#1aaa94"/>
+    </linearGradient>
+    <linearGradient id="innerFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#22b89e"/>
+      <stop offset="100%" stop-color="#18a48c"/>
+    </linearGradient>
+    <linearGradient id="leftSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a1a58"/>
+      <stop offset="100%" stop-color="#222268"/>
+    </linearGradient>
+    <linearGradient id="rightSide" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0%" stop-color="#1a1a58"/>
+      <stop offset="100%" stop-color="#222268"/>
+    </linearGradient>
+    <linearGradient id="bottomBevel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#189080"/>
+      <stop offset="100%" stop-color="#1a9e8a"/>
+    </linearGradient>
+  </defs>
+  <polygon points="68.1,155 250,50 250,128 135.7,194" fill="url(#topBevel)"/>
+  <polygon points="250,50 431.9,155 364.3,194 250,128" fill="url(#topBevel)"/>
+  <polygon points="68.1,155 135.7,194 135.7,326 68.1,365" fill="url(#leftSide)"/>
+  <polygon points="431.9,155 431.9,365 364.3,326 364.3,194" fill="url(#rightSide)"/>
+  <polygon points="68.1,365 250,470 250,392 135.7,326" fill="url(#bottomBevel)"/>
+  <polygon points="431.9,365 250,470 250,392 364.3,326" fill="url(#bottomBevel)"/>
+  <polygon points="250,128 364.3,194 364.3,326 250,392 135.7,326 135.7,194" fill="url(#innerFace)"/>
+  <circle cx="250" cy="260" r="62" fill="none" stroke="#ffffff" stroke-width="10"/>
+  <polygon points="237,232 237,288 275,260" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,79 @@
+---
+title: "Despliegue Local"
+description: "Despliega Mediabox MCP en modo local con acceso directo por puertos, sin reverse proxy ni dominio requerido."
+category: "deployment"
+order: 1
+locale: "es"
+draft: false
+---
+
+
+El **modo local** es la forma mas sencilla de ejecutar Mediabox MCP. Cada servicio expone su puerto directamente en tu maquina y accedes a todo mediante **localhost** en puertos individuales -- sin reverse proxy ni dominio requerido.
+
+## Cuando Usar el Modo Local
+
+- Ejecutas Mediabox en tu propio ordenador o en una maquina de tu red local
+- No necesitas acceso externo (desde internet) a los servicios
+- Quieres el camino mas rapido desde la instalacion hasta tener todo funcionando
+
+## Puertos de Servicios
+
+| Servicio | Puerto | URL |
+| --- | --- | --- |
+| Jellyfin | 8096 | `http://localhost:8096` |
+| Sonarr | 8989 | `http://localhost:8989` |
+| Radarr | 7878 | `http://localhost:7878` |
+| Prowlarr | 9696 | `http://localhost:9696` |
+| qBittorrent | 8085 | `http://localhost:8085` |
+| PyLoad | 8000 | `http://localhost:8001` |
+| Servidor MCP | 3000 | `http://localhost:3000` |
+
+## Configuracion
+
+Al ejecutar el instalador, selecciona el modo de despliegue **local**:
+
+```bash
+npx create-mediabox
+```
+
+Elige **Local** cuando se te pregunte por el tipo de despliegue. El instalador generara un `docker-compose.yml` con todos los puertos mapeados a `0.0.0.0` (todas las interfaces).
+
+Inicia el stack:
+
+```bash
+docker compose up -d
+```
+
+## Verificar el Despliegue
+
+Una vez que los contenedores esten corriendo, confirma que cada servicio es accesible:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8096  # Jellyfin
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8989  # Sonarr
+curl -s -o /dev/null -w "%{http_code}" http://localhost:7878  # Radarr
+curl -s -o /dev/null -w "%{http_code}" http://localhost:9696  # Prowlarr
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8085  # qBittorrent
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8001  # PyLoad
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000  # Servidor MCP
+```
+
+Cada uno deberia devolver `200` (o `302` para servicios que redirigen a una pagina de inicio de sesion).
+
+## Acceso desde la Red Local
+
+Para acceder a los servicios desde otros dispositivos en tu red local, usa la IP LAN de la maquina host en lugar de `localhost`:
+
+```
+http://192.168.1.x:8096
+```
+
+Asegurate de que tu firewall permita conexiones entrantes en los puertos correspondientes.
+
+## Limitaciones
+
+- Sin HTTPS -- el trafico no esta cifrado, lo cual es aceptable en una red local de confianza pero no es adecuado para exposicion a internet
+- Sin enrutamiento por subdominios -- debes recordar los numeros de puerto
+- No es accesible desde fuera de tu red sin configuracion adicional (reenvio de puertos, VPN, etc.)
+
+Para despliegues accesibles desde internet, consulta [VPS con Caddy](/es/docs/deployment/vps-caddy) o [Cloudflare Tunnel](/es/docs/deployment/cloudflare-tunnel).

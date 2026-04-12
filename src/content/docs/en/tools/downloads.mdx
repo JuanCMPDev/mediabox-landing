@@ -1,0 +1,116 @@
+---
+title: "Download Tools"
+description: "Tools for adding downloads, checking status, direct-downloading files, and cancelling queued items."
+category: "tools"
+order: 6
+locale: "en"
+draft: false
+---
+
+
+These four tools manage downloads across the Mediabox stack -- add URLs to PyLoad, check download status, direct-download files via aria2c or yt-dlp, and manage queues across Sonarr, Radarr, and qBittorrent.
+
+---
+
+## download_add
+
+Add one or more URLs to the PyLoad download manager as a new package. The package name becomes the subfolder name in the downloads directory.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `urls` | string[] | Yes | Array of URLs to download. |
+| `packageName` | string | Yes | Descriptive name (e.g. "Pet Sematary 1989"). Becomes the download folder name. |
+
+### Usage Example
+
+> "Download these two Mega links and call the package 'Pet Sematary 1989'."
+
+---
+
+## download_status
+
+PyLoad download manager. Check the queue, organize completed downloads into the Jellyfin library, or delete packages.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `action` | enum | No | `status` (default), `organize`, or `delete`. |
+| `packageIds` | number[] | Conditional | PyLoad package IDs to delete. Required when `action` is `delete`. |
+| `packageFolder` | string | Conditional | Folder name in /downloads/ to organize (from the status response's `downloadFolders`). Required when `action` is `organize`. |
+| `showName` | string | Conditional | Target name in Jellyfin (e.g. "Pet Sematary (1989)"). Required when `action` is `organize`. |
+| `libraryFolder` | enum | No | Target library: `tv`, `movies` (default), `music`, or `anime`. |
+| `seasonNumber` | number | No | Season number (only for tv/anime). |
+| `episodeNumber` | number | No | Starting episode number (only for tv/anime). |
+| `archivePassword` | string | No | Password for RAR/ZIP/7z archives. |
+
+### Actions
+
+- **status** -- Display the PyLoad queue, active download progress, and list folders in /downloads/ ready to organize.
+- **organize** -- Move downloaded files from a download folder into the appropriate Jellyfin library. Runs as a background job for archives.
+- **delete** -- Remove packages from the PyLoad queue by their package IDs.
+
+### Usage Example
+
+> "What's the current download status?"
+
+> "Organize the 'Pet Sematary 1989' folder into movies as 'Pet Sematary (1989)'."
+
+> "Delete PyLoad packages 12 and 15."
+
+---
+
+## download_direct
+
+Download a file from a direct URL (or YouTube/video site via yt-dlp) and organize it into the Jellyfin library. Use this instead of `download_add` for direct HTTP links, Google Drive, and YouTube-supported sites. Runs as a background job.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `url` | string | Yes | Direct URL to download (HTTP link, YouTube, Google Drive, etc.). |
+| `showName` | string | Yes | Target name in Jellyfin (e.g. "Tears of Steel (2012)"). |
+| `libraryFolder` | enum | No | Target library: `tv`, `movies` (default), `music`, or `anime`. |
+| `seasonNumber` | number | No | Season number (only for tv/anime). |
+| `episodeNumber` | number | No | Starting episode number (only for tv/anime). |
+
+### Usage Example
+
+> "Direct download https://example.com/movie.mkv as 'Tears of Steel (2012)' into movies."
+
+> "Download this YouTube video as 'Big Buck Bunny (2008)': https://youtube.com/watch?v=abc123."
+
+---
+
+## cancel_downloads
+
+Manage Sonarr, Radarr, and qBittorrent download queues. Not for PyLoad -- use `download_status` with `action=delete` for PyLoad packages.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `source` | enum | Yes | Which queue to manage: `sonarr`, `radarr`, or `qbittorrent`. |
+| `action` | enum | No | `list` (default), `cancel`, `cancel_series`, `purge_duplicates`, or `clean_orphans`. |
+| `queueIds` | number[] | No | Sonarr/Radarr queue item IDs to cancel (used with `action=cancel`). |
+| `torrentHashes` | string[] | No | qBittorrent torrent hashes to delete (used with `action=cancel` and `source=qbittorrent`). |
+| `seriesId` | number | No | Cancel all queue items for this Sonarr series ID (used with `action=cancel_series`). |
+| `movieId` | number | No | Cancel all queue items for this Radarr movie ID (used with `action=cancel_series`). |
+
+### Actions
+
+- **list** -- Show all items currently in the selected queue.
+- **cancel** -- Cancel specific items by queue ID (Sonarr/Radarr) or torrent hash (qBittorrent).
+- **cancel_series** -- Cancel all queue items matching a given `seriesId` or `movieId`.
+- **purge_duplicates** -- Remove duplicate queue entries, keeping the best-scored item (Sonarr/Radarr only).
+- **clean_orphans** -- Remove qBittorrent torrents that are no longer tracked by Sonarr or Radarr.
+
+### Usage Example
+
+> "List the Sonarr download queue."
+
+> "Cancel Radarr queue items 45 and 67."
+
+> "Clean up orphaned torrents in qBittorrent."

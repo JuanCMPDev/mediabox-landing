@@ -1,0 +1,100 @@
+---
+title: "Herramientas de Biblioteca"
+description: "Herramientas para gestionar bibliotecas de Jellyfin, archivos, nomenclatura de episodios y conversión de subtítulos."
+category: "tools"
+order: 3
+locale: "es"
+draft: false
+---
+
+
+Estas cuatro herramientas gestionan bibliotecas, operaciones de archivos, renombrado de episodios en lote y conversión de subtítulos en tu servidor multimedia.
+
+---
+
+## manage_library
+
+Crear una biblioteca, iniciar un escaneo o refrescar metadatos de un elemento.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `action` | string | Sí | Acción a realizar. Uno de: `scan`, `create`, `refresh_metadata`. |
+| `name` | string | Condicional | Nombre de la biblioteca. Requerido cuando `action` es `create`. |
+| `type` | string | Condicional | Tipo de biblioteca. Requerido cuando `action` es `create`. Uno de: `movies`, `tvshows`, `music`, `mixed`. |
+| `folder` | string | Condicional | Ruta de la carpeta (ej. `'/data/anime'`). Requerido cuando `action` es `create`. |
+| `itemId` | string | Condicional | ID del elemento en Jellyfin. Requerido cuando `action` es `refresh_metadata`. |
+
+### Ejemplo de Uso
+
+> "Crea una nueva biblioteca mixta llamada 'Anime' apuntando a /data/anime."
+
+> "Escanea la biblioteca en busca de contenido nuevo."
+
+> "Refresca los metadatos del elemento abc123."
+
+---
+
+## manage_files
+
+Listar, mover o eliminar archivos y carpetas. Las rutas que comienzan con `downloads/` acceden a la carpeta de descargas. Todas las demás rutas son relativas al volumen multimedia.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `action` | string | Sí | Acción a realizar. Uno de: `list`, `move`, `delete`. |
+| `path` | string | No | Ruta para listar o eliminar (ej. `'anime/Show'`, `'downloads/'`, `'movies/'`). |
+| `sourcePaths` | string[] | Condicional | Array de rutas de origen para mover (ej. `['downloads/file.mkv', 'tv/Show1']`). Requerido cuando `action` es `move`. |
+| `destFolder` | string | Condicional | Carpeta de destino para mover (ej. `'movies/Movie Name'`). Requerido cuando `action` es `move`. |
+| `jellyfinItemId` | string | No | ID del elemento en Jellyfin a eliminar. También elimina archivos del disco y limpia entradas de Sonarr/Radarr. Se usa cuando `action` es `delete`. |
+
+### Ejemplo de Uso
+
+> "Lista todos los archivos en la carpeta de descargas."
+
+> "Mueve downloads/movie.mkv y downloads/subs.srt a movies/Movie (2024)."
+
+> "Elimina el elemento de Jellyfin con ID abc123."
+
+---
+
+## rename_episodes
+
+Renombrar archivos de episodios al formato estándar de Jellyfin (`ShowName - S01E01.ext`). Busca en la carpeta del show de forma recursiva. Puedes pasar `jellyfinItemId` en lugar de `showPath` -- la herramienta resuelve la ruta desde Jellyfin automáticamente.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `showName` | string | Sí | Nombre correcto del show para los archivos renombrados (ej. `'Rurouni Kenshin'`). |
+| `showPath` | string | No | Ruta a la carpeta del show (ej. `'anime/Samurai X'`). Opcional si se proporciona `jellyfinItemId`. |
+| `jellyfinItemId` | string | No | ID del elemento en Jellyfin -- resuelve la ruta del archivo automáticamente. Opcional si se proporciona `showPath`. |
+| `seasonNumber` | number | No | Número de temporada a usar en los nombres de archivo. Por defecto `1`. |
+| `dryRun` | boolean | No | Previsualizar cambios sin aplicarlos. Por defecto `true`. |
+
+### Ejemplo de Uso
+
+> "Previsualiza el renombrado de episodios en anime/Samurai X a 'Rurouni Kenshin'."
+
+> "Renombra todos los episodios del elemento abc123 a 'Breaking Bad' temporada 3, aplica los cambios."
+
+---
+
+## fix_subtitles
+
+Convertir subtítulos ASS/SSA a SRT en archivos MKV para evitar transcodificación. Funciona en un solo archivo o una carpeta completa (búsqueda recursiva). Lotes grandes (más de 3 archivos) se ejecutan como tarea en segundo plano.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `mediaPath` | string | Sí | Ruta a un archivo multimedia o carpeta (ej. `'anime/Show'` o `'/data/anime/Show'`). |
+| `dryRun` | boolean | No | Listar archivos que serían procesados sin realizar cambios. Por defecto `true`. |
+
+### Ejemplo de Uso
+
+> "Haz una prueba de conversión de subtítulos para anime/Show."
+
+> "Arregla los subtítulos en todos los archivos MKV bajo anime/Show, aplica los cambios."

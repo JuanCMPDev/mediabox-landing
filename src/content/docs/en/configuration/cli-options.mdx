@@ -1,0 +1,94 @@
+---
+title: "CLI Options"
+description: "Command-line flags and options available when running the Mediabox MCP setup wizard."
+category: "configuration"
+order: 3
+locale: "en"
+draft: false
+---
+
+
+The `npx create-mediabox` command accepts optional flags to customize the setup behavior.
+
+## Usage
+
+```bash
+npx create-mediabox [options]
+```
+
+## Available Flags
+
+### `--local-build`
+
+Build all Docker images from source instead of pulling pre-built images from the container registry.
+
+```bash
+npx create-mediabox --local-build
+```
+
+This is useful when:
+
+- You have made local modifications to the MCP server or other service configurations
+- You want to test changes before publishing new images
+- You are contributing to the Mediabox MCP project and need to verify your changes
+- You are in an environment with restricted access to container registries
+
+The build process takes longer than pulling pre-built images, as it compiles each service locally. Expect an additional 5-10 minutes depending on your hardware and internet connection.
+
+### `--generate-only`
+
+Generate all configuration files (`.env`, `docker-compose.yml`, service configs) without starting Docker containers.
+
+```bash
+npx create-mediabox --generate-only
+```
+
+This is useful when:
+
+- You want to review or modify the generated configuration before starting the stack
+- You are setting up on a machine where Docker is not yet installed
+- You need to transfer the configuration to a different server
+- You want to version-control the generated files before deploying
+
+After generating the files, you can start the stack manually:
+
+```bash
+docker compose up -d
+```
+
+### Combining Flags
+
+Flags can be combined:
+
+```bash
+npx create-mediabox --local-build --generate-only
+```
+
+This generates the configuration files with local build settings in the `docker-compose.yml` (using `build:` directives instead of `image:` references) without starting any containers.
+
+## Examples
+
+**Standard setup** (interactive wizard, pulls pre-built images, starts Docker):
+
+```bash
+npx create-mediabox
+```
+
+**Generate config only, then review before starting:**
+
+```bash
+npx create-mediabox --generate-only
+# Review the generated files
+cat .env
+cat docker-compose.yml
+# Start when ready
+docker compose up -d
+```
+
+**Development workflow with local builds:**
+
+```bash
+git clone https://github.com/JuanCMPDev/mediabox-mcp.git
+cd mediabox-mcp
+npx create-mediabox --local-build
+```

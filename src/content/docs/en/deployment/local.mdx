@@ -1,0 +1,79 @@
+---
+title: "Local Deployment"
+description: "Deploy Mediabox MCP locally with direct port access -- no reverse proxy or domain required."
+category: "deployment"
+order: 1
+locale: "en"
+draft: false
+---
+
+
+**Local mode** is the simplest way to run Mediabox MCP. Each service exposes its port directly on your machine, and you access everything via **localhost** on individual ports -- no reverse proxy or domain required.
+
+## When to Use Local Mode
+
+- You are running Mediabox on your own computer or a machine on your local network
+- You do not need external (internet) access to the services
+- You want the fastest path from install to running
+
+## Service Ports
+
+| Service | Port | URL |
+| --- | --- | --- |
+| Jellyfin | 8096 | `http://localhost:8096` |
+| Sonarr | 8989 | `http://localhost:8989` |
+| Radarr | 7878 | `http://localhost:7878` |
+| Prowlarr | 9696 | `http://localhost:9696` |
+| qBittorrent | 8085 | `http://localhost:8085` |
+| PyLoad | 8000 | `http://localhost:8001` |
+| MCP Server | 3000 | `http://localhost:3000` |
+
+## Setup
+
+When running the installer, select the **local** deployment mode:
+
+```bash
+npx create-mediabox
+```
+
+Choose **Local** when prompted for the deployment type. The installer will generate a `docker-compose.yml` with all ports mapped to `0.0.0.0` (all interfaces).
+
+Start the stack:
+
+```bash
+docker compose up -d
+```
+
+## Verifying the Deployment
+
+After the containers are running, confirm each service is reachable:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8096  # Jellyfin
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8989  # Sonarr
+curl -s -o /dev/null -w "%{http_code}" http://localhost:7878  # Radarr
+curl -s -o /dev/null -w "%{http_code}" http://localhost:9696  # Prowlarr
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8085  # qBittorrent
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8001  # PyLoad
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000  # MCP Server
+```
+
+Each should return `200` (or `302` for services that redirect to a login page).
+
+## LAN Access
+
+To access services from other devices on your local network, use the host machine's LAN IP instead of `localhost`:
+
+```
+http://192.168.1.x:8096
+```
+
+Make sure your firewall allows inbound connections on the relevant ports.
+
+## Limitations
+
+- No HTTPS -- traffic is unencrypted, which is acceptable on a trusted LAN but not suitable for internet exposure
+- No subdomain routing -- you must remember port numbers
+- Not reachable from outside your network without additional configuration (port forwarding, VPN, etc.)
+
+For internet-accessible deployments, see [VPS with Caddy](/docs/deployment/vps-caddy) or [Cloudflare Tunnel](/docs/deployment/cloudflare-tunnel).

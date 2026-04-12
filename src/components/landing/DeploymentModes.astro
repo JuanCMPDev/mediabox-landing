@@ -1,0 +1,83 @@
+---
+import { useTranslations, type Locale } from '../../i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const locale = (Astro.props.locale ?? 'en') as Locale;
+const t = useTranslations(locale);
+
+const modes = [
+  {
+    key: 'local' as const,
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+    color: '#4caf50',
+    ports: '8096, 8989, 7878...',
+  },
+  {
+    key: 'vps' as const,
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>',
+    color: '#8b5cf6',
+    ports: 'jellyfin.domain.com',
+  },
+  {
+    key: 'tunnel' as const,
+    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>',
+    color: '#06b6d4',
+    ports: 'Cloudflare Network',
+  },
+];
+---
+
+<section class="relative py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6">
+    <!-- Section header -->
+    <div class="text-center mb-10 sm:mb-16">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight gradient-text">{t.deployment.title}</h2>
+      <p class="mt-3 sm:mt-4 text-base sm:text-lg text-text-secondary px-2">{t.deployment.subtitle}</p>
+    </div>
+
+    <!-- Deploy mode cards -->
+    <div class="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3">
+      {modes.map((mode) => {
+        const data = t.deployment[mode.key];
+        return (
+          <div class="glass-card rounded-xl sm:rounded-2xl p-6 sm:p-8 relative group overflow-hidden">
+            <!-- Glow on hover -->
+            <div
+              class="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-3xl"
+              style={`background: ${mode.color}20`}
+            ></div>
+
+            <div class="relative">
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-6"
+                style={`background: ${mode.color}15; border: 1px solid ${mode.color}30`}
+              >
+                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke={mode.color} viewBox="0 0 24 24" set:html={mode.icon} />
+              </div>
+
+              <h3 class="text-lg sm:text-xl font-semibold text-text-primary mb-2 sm:mb-3">{data.title}</h3>
+              <p class="text-xs sm:text-sm text-text-secondary leading-relaxed mb-4 sm:mb-6">{data.description}</p>
+
+              <div class="pt-3 sm:pt-4 border-t border-border-subtle">
+                <div class="text-[10px] sm:text-xs text-text-muted mb-1 uppercase tracking-wider">Endpoint</div>
+                <code class="text-[10px] sm:text-xs font-mono text-text-secondary">{mode.ports}</code>
+              </div>
+
+              <div class="mt-3 sm:mt-4">
+                <span
+                  class="text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full"
+                  style={`background: ${mode.color}10; color: ${mode.color}; border: 1px solid ${mode.color}25`}
+                >
+                  {data.bestFor}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,82 @@
+---
+title: "Claude Desktop"
+description: "Conecta Mediabox MCP a Claude Desktop para gestionar tu multimedia con IA a traves de conversacion natural."
+category: "integrations"
+order: 1
+locale: "es"
+draft: false
+---
+
+**Claude Desktop** es la forma principal de interactuar con Mediabox MCP. Una vez conectado, puedes buscar peliculas, iniciar descargas, consultar el progreso y gestionar toda tu biblioteca multimedia mediante lenguaje natural usando las **25 herramientas MCP**.
+
+## Requisitos Previos
+
+- [Claude Desktop](https://claude.ai/download) instalado
+- Stack de Mediabox MCP corriendo y accesible (localmente o mediante una URL publica)
+
+## Configuracion
+
+Abre el archivo de configuracion de Claude Desktop:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+Agrega el servidor Mediabox MCP a la seccion `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "https://media.ejemplo.com/mcp"
+    }
+  }
+}
+```
+
+Reemplaza `https://media.ejemplo.com` con la URL real de tu servidor MCP (el valor de `MCP_PUBLIC_URL` en tu archivo `.env`). Para despliegues locales, usa:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+> Solo necesitas el campo `url`. Claude Desktop detecta automaticamente el transporte Streamable HTTP y maneja la conexion.
+
+## Autenticacion
+
+Mediabox MCP utiliza **OAuth2** para la autenticacion. Cuando Claude Desktop se conecta al servidor MCP por primera vez:
+
+1. Claude Desktop detecta el requisito de OAuth2 automaticamente
+2. Se abre una ventana del navegador para la autorizacion
+3. Apruebas la conexion
+4. El token OAuth2 se almacena localmente -- no necesitaras volver a autenticarte hasta que expire (24 horas para tokens de acceso, 30 dias para tokens de refresco)
+
+No se requiere gestion manual de tokens. Todo el flujo es manejado por el soporte nativo de OAuth2 del protocolo MCP.
+
+## Usando las Herramientas de Mediabox
+
+Despues de conectar, Claude tiene acceso a las 25 herramientas de Mediabox MCP. Puedes interactuar de forma natural:
+
+- *"Busca The Expanse en Sonarr y agregala"*
+- *"Que peliculas se estan descargando ahora?"*
+- *"Muestrame las estadisticas de mi biblioteca de Jellyfin"*
+- *"Agrega la pelicula Dune Parte Dos en 4K"*
+
+Claude seleccionara e invocara las herramientas MCP apropiadas de forma automatica.
+
+## Verificar la Conexion
+
+En Claude Desktop, inicia una nueva conversacion y pregunta:
+
+> *"Cual es el estado del servidor?"*
+
+Claude deberia usar la herramienta `server_status` y devolver la informacion de tu servidor Jellyfin, uso de disco y estadisticas de la biblioteca. Si las herramientas no aparecen, verifica que:
+
+- El servidor MCP este corriendo (`docker ps` deberia mostrar el contenedor `mcp-server`)
+- La URL en tu configuracion sea correcta y accesible
+- Hayas completado el flujo de autenticacion OAuth2

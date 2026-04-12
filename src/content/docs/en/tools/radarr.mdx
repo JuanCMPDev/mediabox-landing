@@ -1,0 +1,118 @@
+---
+title: "Radarr Tools"
+description: "Tools for searching, monitoring, and downloading movies through Radarr."
+category: "tools"
+order: 5
+locale: "en"
+draft: false
+---
+
+
+These five tools manage movies through Radarr -- search for films, monitor their status, browse available releases, and trigger downloads.
+
+---
+
+## movie_search
+
+Search for a movie and optionally add it to Radarr for monitoring. Use `searchNow=false` (the default) to add without auto-downloading, letting you pick a release manually via `movie_releases` + `movie_grab`.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `query` | string | No | Movie name to search. Required for search, optional when adding by ID. |
+| `addTmdbId` | number | No | TMDB ID to add (from search results). Omit to just search. |
+| `quality` | string | No | Quality profile name. One of `"Any"`, `"SD"`, `"HD-720p"`, `"HD-1080p"`, `"Ultra-HD"`, `"HD - 720p/1080p"`. Defaults to `"HD-1080p"`. |
+| `searchNow` | boolean | No | Trigger automatic download search after adding. Defaults to `false`. |
+
+### Usage Example
+
+> "Search Radarr for 'Oppenheimer'."
+
+> "Add TMDB 872585 to Radarr with Ultra-HD quality."
+
+> "Add Dune Part Two but don't search for downloads yet."
+
+---
+
+## movie_status
+
+View the state of your movie library in Radarr -- monitored movies, the download queue, or download history.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `view` | string | No | The view to display. One of `"movies"`, `"queue"`, `"history"`. Defaults to `"movies"`. |
+| `limit` | number | No | Maximum number of items to return (for history view). Defaults to `20`. |
+
+### Views
+
+- **movies** -- List all movies currently being monitored by Radarr.
+- **queue** -- Show the current download queue for movies.
+- **history** -- View recent download and import history.
+
+### Usage Example
+
+> "What movies am I monitoring?"
+
+> "What's in the movie download queue?"
+
+> "Show me recent movie download history."
+
+---
+
+## movie_remove
+
+Remove a movie from Radarr. Optionally delete the associated files from disk.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `movieId` | number | Yes | The Radarr movie ID to remove. |
+| `deleteFiles` | boolean | No | When `true`, also delete the movie files from disk. Defaults to `false`. |
+
+### Usage Example
+
+> "Remove movie 87 from Radarr."
+
+> "Remove that old movie and delete its files too."
+
+---
+
+## movie_releases
+
+Search for available torrent releases for a specific movie. Shows size, languages, seeders, and custom format score.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `movieId` | number | Yes | The Radarr movie ID to search releases for. |
+
+### Usage Example
+
+> "Search for available releases for movie 87."
+
+> "What downloads are available for Oppenheimer?"
+
+---
+
+## movie_grab
+
+Download a specific torrent release for a movie. Automatically cancels any existing download for the same movie to avoid duplicates.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `guid` | string | Yes | The release GUID to download (from `movie_releases` results). |
+| `indexerId` | number | Yes | The indexer ID for the release (from `movie_releases` results). |
+| `movieId` | number | No | Radarr movie ID. If provided, cancels any active download for this movie before grabbing. |
+
+### Usage Example
+
+> "Grab the release with GUID xyz789abc012 from indexer 3."
+
+> "Download the first release from that list for movie 87."

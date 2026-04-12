@@ -1,0 +1,76 @@
+---
+title: "Maintenance Tools"
+description: "Tools for optimizing media files, cleaning up the server, and tracking background jobs."
+category: "tools"
+order: 7
+locale: "en"
+draft: false
+---
+
+
+These three tools handle ongoing server maintenance -- optimize media files by stripping unwanted tracks, clean up caches and orphaned data, and monitor background job progress.
+
+---
+
+## optimize_media
+
+Analyze or strip unwanted audio and subtitle tracks from MKV files to save space. Works on a single file or an entire folder (batch). Large batches (more than 3 files) run as a background job.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `mediaPath` | string | Yes | Path to a media file or folder (e.g. "anime/Invincible (2021)" or full path "/data/anime/Invincible (2021)"). |
+| `action` | enum | No | `analyze` (default) to show tracks, or `optimize` to strip unwanted tracks. |
+| `keepAudioLangs` | string[] | No | Audio language codes to keep (e.g. `["spa", "eng", "jpn"]`). Others are removed. Omit to keep all. |
+| `keepSubLangs` | string[] | No | Subtitle language codes to keep (e.g. `["spa", "eng"]`). Others are removed. Omit to keep all. |
+| `removeAllSubs` | boolean | No | Remove ALL subtitle tracks. Defaults to `false`. |
+
+### Actions
+
+- **analyze** -- List all audio and subtitle tracks in the target MKV file(s), including language, codec, channels, and track metadata.
+- **optimize** -- Remove audio and subtitle tracks that do not match the specified keep lists. Video tracks are always preserved. Files where nothing would change are skipped.
+
+### Usage Example
+
+> "Analyze the tracks in anime/Invincible (2021)."
+
+> "Optimize movies/Movie (2024) keeping only English and Spanish audio and English subtitles."
+
+> "Strip all subtitles from tv/Show/Season 01."
+
+---
+
+## cleanup_server
+
+Clean up the server: remove Jellyfin cache info, temp files, orphan downloads, ghost entries in Sonarr/Radarr, and completed qBittorrent torrents. Runs all cleanup operations every time -- there is no action selector.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `dryRun` | boolean | No | Preview what would be cleaned without deleting anything. Defaults to `true`. |
+
+### Usage Example
+
+> "Do a dry-run server cleanup."
+
+> "Run the server cleanup for real."
+
+---
+
+## check_jobs
+
+Check status of background operations (file moves, media optimizations, etc.). Returns progress and results for running or completed jobs.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `jobId` | string | No | Specific job ID to check. Omit to see all active jobs. |
+
+### Usage Example
+
+> "Are there any background jobs running?"
+
+> "Check the status of job abc123."

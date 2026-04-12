@@ -1,0 +1,94 @@
+---
+title: "Opciones del CLI"
+description: "Flags y opciones de linea de comandos disponibles al ejecutar el asistente de configuracion de Mediabox MCP."
+category: "configuration"
+order: 3
+locale: "es"
+draft: false
+---
+
+
+El comando `npx create-mediabox` acepta flags opcionales para personalizar el comportamiento de la configuracion.
+
+## Uso
+
+```bash
+npx create-mediabox [opciones]
+```
+
+## Flags Disponibles
+
+### `--local-build`
+
+Compila todas las imagenes Docker desde el codigo fuente en lugar de descargar las imagenes preconstruidas del registro de contenedores.
+
+```bash
+npx create-mediabox --local-build
+```
+
+Es util cuando:
+
+- Has realizado modificaciones locales al servidor MCP u otras configuraciones de servicios
+- Quieres probar cambios antes de publicar nuevas imagenes
+- Estas contribuyendo al proyecto Mediabox MCP y necesitas verificar tus cambios
+- Te encuentras en un entorno con acceso restringido a registros de contenedores
+
+El proceso de compilacion toma mas tiempo que descargar imagenes preconstruidas, ya que compila cada servicio localmente. Espera entre 5 y 10 minutos adicionales dependiendo de tu hardware y conexion a internet.
+
+### `--generate-only`
+
+Genera todos los archivos de configuracion (`.env`, `docker-compose.yml`, configuraciones de servicios) sin iniciar los contenedores Docker.
+
+```bash
+npx create-mediabox --generate-only
+```
+
+Es util cuando:
+
+- Deseas revisar o modificar la configuracion generada antes de iniciar el stack
+- Estas configurando en una maquina donde Docker aun no esta instalado
+- Necesitas transferir la configuracion a un servidor diferente
+- Quieres versionar los archivos generados antes de desplegar
+
+Despues de generar los archivos, puedes iniciar el stack manualmente:
+
+```bash
+docker compose up -d
+```
+
+### Combinacion de Flags
+
+Los flags se pueden combinar:
+
+```bash
+npx create-mediabox --local-build --generate-only
+```
+
+Esto genera los archivos de configuracion con la opcion de compilacion local en el `docker-compose.yml` (usando directivas `build:` en lugar de referencias `image:`) sin iniciar ningun contenedor.
+
+## Ejemplos
+
+**Configuracion estandar** (asistente interactivo, descarga imagenes preconstruidas, inicia Docker):
+
+```bash
+npx create-mediabox
+```
+
+**Generar solo la configuracion, luego revisar antes de iniciar:**
+
+```bash
+npx create-mediabox --generate-only
+# Revisar los archivos generados
+cat .env
+cat docker-compose.yml
+# Iniciar cuando estes listo
+docker compose up -d
+```
+
+**Flujo de trabajo de desarrollo con compilacion local:**
+
+```bash
+git clone https://github.com/JuanCMPDev/mediabox-mcp.git
+cd mediabox-mcp
+npx create-mediabox --local-build
+```

@@ -1,0 +1,96 @@
+---
+import { useTranslations, getLocaleFromUrl, type Locale } from '../../i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const locale = (Astro.props.locale ?? getLocaleFromUrl(Astro.url)) as Locale;
+const t = useTranslations(locale);
+const isEs = locale === 'es';
+
+const homeHref = isEs ? '/es' : '/';
+const docsHref = isEs ? '/es/docs/getting-started/introduction' : '/docs/getting-started/introduction';
+const switchHref = isEs ? Astro.url.pathname.replace(/^\/es/, '') || '/' : `/es${Astro.url.pathname}`;
+const switchLabel = isEs ? 'EN' : 'ES';
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-border-subtle">
+  <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 h-18">
+    <a href={homeHref} class="flex items-center gap-2.5 group shrink-0">
+      <img src="/logo.svg" alt="Mediabox" class="h-11 w-11 rounded-lg" />
+      <span class="text-base font-bold text-text-primary group-hover:text-accent-hover transition-colors">
+        Mediabox MCP
+      </span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-6">
+      <a href={homeHref} class="text-sm text-text-secondary hover:text-text-primary transition-colors">
+        {t.nav.home}
+      </a>
+      <a href={docsHref} class="text-sm text-text-secondary hover:text-text-primary transition-colors">
+        {t.nav.docs}
+      </a>
+      <a
+        href="https://github.com/JuanCMPDev/mediabox-mcp"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm text-text-secondary hover:text-text-primary transition-colors"
+      >
+        {t.nav.github}
+      </a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a
+        href={switchHref}
+        class="text-xs font-medium px-2.5 py-1 rounded-full border border-border-visible text-text-secondary hover:text-text-primary hover:border-border-hover transition-all"
+      >
+        {switchLabel}
+      </a>
+      <a
+        href={docsHref}
+        class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-full bg-accent hover:bg-accent-hover text-white transition-colors"
+      >
+        {t.hero.cta}
+      </a>
+
+      <!-- Mobile menu button -->
+      <button
+        id="mobile-menu-btn"
+        class="md:hidden p-1.5 text-text-secondary hover:text-text-primary transition-colors"
+        aria-label="Menu"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-border-subtle bg-bg-secondary/95 backdrop-blur-xl">
+    <div class="px-4 py-3 flex flex-col gap-3">
+      <a href={homeHref} class="text-sm text-text-secondary hover:text-text-primary transition-colors py-1">
+        {t.nav.home}
+      </a>
+      <a href={docsHref} class="text-sm text-text-secondary hover:text-text-primary transition-colors py-1">
+        {t.nav.docs}
+      </a>
+      <a
+        href="https://github.com/JuanCMPDev/mediabox-mcp"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm text-text-secondary hover:text-text-primary transition-colors py-1"
+      >
+        {t.nav.github}
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+    document.getElementById('mobile-menu')?.classList.toggle('hidden');
+  });
+</script>

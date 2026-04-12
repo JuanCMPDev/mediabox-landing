@@ -1,0 +1,136 @@
+---
+title: "Docker Compose"
+description: "Understanding the Mediabox MCP Docker Compose stack, its services, ports, volumes, and customization options."
+category: "configuration"
+order: 2
+locale: "en"
+draft: false
+---
+
+Mediabox MCP runs as a multi-container Docker Compose stack. This page explains each service, its configuration, and how to customize the stack.
+
+## Service Overview
+
+| Service | Image | Host Port | Description |
+|---|---|---|---|
+| **Jellyfin** | `lscr.io/linuxserver/jellyfin` | 8096 | Media streaming server |
+| **MCP Server** | Built from `./mcp-server` | 3000 | AI tool server (25 MCP tools) |
+| **Sonarr** | `lscr.io/linuxserver/sonarr` | 8989 | TV show management |
+| **Radarr** | `lscr.io/linuxserver/radarr` | 7878 | Movie management |
+| **qBittorrent** | `lscr.io/linuxserver/qbittorrent` | 8085 | BitTorrent client |
+| **PyLoad** | `lscr.io/linuxserver/pyload-ng` | 8001 | Direct download manager |
+| **Prowlarr** | `lscr.io/linuxserver/prowlarr` | 9696 | Indexer manager |
+| **FlareSolverr** | `ghcr.io/flaresolverr/flaresolverr` | 8191 | Cloudflare bypass proxy |
+
+### Optional Services
+
+| Service | Image | Port | Description |
+|---|---|---|---|
+| **Telegram Bot** | Built from `./mcp-telegram-client` | -- | Telegram interface for managing media via chat. Enabled during wizard setup. |
+| **Bazarr** | `lscr.io/linuxserver/bazarr` | 6767 | Automatic subtitle downloader. Enabled during wizard setup. |
+
+> Caddy (reverse proxy) and Cloudflared (tunnel client) are added by the wizard when selecting VPS or Tunnel deployment modes respectively. They are not present in the base `docker-compose.yml`.
+
+## Ports
+
+In **local** mode, services are accessible directly on their host ports:
+
+```
+http://localhost:8096   # Jellyfin
+http://localhost:3000   # MCP Server
+http://localhost:8989   # Sonarr
+http://localhost:7878   # Radarr
+http://localhost:8085   # qBittorrent
+http://localhost:8001   # PyLoad
+http://localhost:9696   # Prowlarr
+http://localhost:8191   # FlareSolverr
+```
+
+In **VPS** mode, all ports are bound to `127.0.0.1` and accessed through Caddy subdomains (e.g., `jellyfin.your-domain.com`).
+
+## Volumes
+
+### Configuration Volumes
+
+Each service stores its configuration in a subdirectory of `./config/`:
+
+| Volume Path | Purpose |
+|---|---|
+| `./config/jellyfin` | Jellyfin configuration, metadata, and database |
+| `./config/sonarr` | Sonarr configuration and database |
+| `./config/radarr` | Radarr configuration and database |
+| `./config/qbittorrent` | qBittorrent configuration |
+| `./config/prowlarr` | Prowlarr configuration and database |
+| `./config/pyload` | PyLoad configuration |
+
+### Media Volumes
+
+Media files are stored in `./media/` and shared between Jellyfin, Sonarr, Radarr, and the MCP server:
+
+```
+media/
+  movies/    # Movies (managed by Radarr)
+  tv/        # TV shows (managed by Sonarr)
+  anime/     # Anime
+  music/     # Music
+```
+
+The `./downloads/` directory is used by qBittorrent and PyLoad for active downloads before they are imported.
+
+## Network Configuration
+
+All services communicate over a shared Docker bridge network called `mediabox-net`. Services reference each other by container name (e.g., Sonarr connects to qBittorrent at `http://qbittorrent:8085`).
+
+```yaml
+networks:
+  mediabox-net:
+    driver: bridge
+```
+
+Internal ports used for service-to-service communication:
+
+| Service | Internal URL |
+|---|---|
+| Jellyfin | `http://jellyfin:8096` |
+| MCP Server | `http://mcp-server:3000` |
+| Sonarr | `http://sonarr:8989` |
+| Radarr | `http://radarr:7878` |
+| qBittorrent | `http://qbittorrent:8085` |
+| PyLoad | `http://pyload:8000` |
+| Prowlarr | `http://prowlarr:9696` |
+| FlareSolverr | `http://flaresolverr:8191` |
+
+## Customization Tips
+
+### Changing Ports
+
+To change a service's host port, modify the `ports` mapping in `docker-compose.yml`:
+
+```yaml
+services:
+  jellyfin:
+    ports:
+      - "9096:8096"  # Changed from 8096 to 9096 on the host
+```
+
+### GPU Transcoding (Jellyfin)
+
+To enable hardware-accelerated transcoding in Jellyfin, pass through your GPU:
+
+```yaml
+services:
+  jellyfin:
+    devices:
+      - /dev/dri:/dev/dri  # Intel/AMD GPU
+    # For NVIDIA, use the NVIDIA Container Toolkit instead
+```
+
+### Restarting After Changes
+
+After modifying `docker-compose.yml`, apply the changes:
+
+```bash
+docker compose up -d
+```
+
+Docker Compose will only recreate containers whose configuration has changed.

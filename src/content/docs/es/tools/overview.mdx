@@ -1,0 +1,56 @@
+---
+title: "Resumen de Herramientas"
+description: "Resumen de las 25 herramientas MCP disponibles en Mediabox MCP, organizadas por categoría."
+category: "tools"
+order: 1
+locale: "es"
+draft: false
+---
+
+
+Mediabox MCP expone **25 herramientas** a través del Model Context Protocol, organizadas en seis categorías. Cada herramienta puede ser invocada por cualquier cliente de IA compatible con MCP usando lenguaje natural.
+
+## Categorías de Herramientas
+
+| Categoría | Herramientas | Descripción |
+|---|---|---|
+| [Jellyfin](/es/docs/tools/jellyfin) | 4 | Consultar estado del servidor, revisar actividad, buscar contenido e inspeccionar detalles de series |
+| [Biblioteca](/es/docs/tools/library) | 4 | Gestionar bibliotecas, archivos, nomenclatura de episodios y conversión de subtítulos |
+| [Sonarr](/es/docs/tools/sonarr) | 5 | Buscar, monitorear y descargar series de TV |
+| [Radarr](/es/docs/tools/radarr) | 5 | Buscar, monitorear y descargar películas |
+| [Descargas](/es/docs/tools/downloads) | 4 | Agregar descargas, consultar estado, descarga directa de archivos y cancelar elementos en cola |
+| [Mantenimiento](/es/docs/tools/maintenance) | 3 | Optimizar archivos multimedia, limpiar el servidor y monitorear tareas en segundo plano |
+
+## Todas las Herramientas de un Vistazo
+
+| Herramienta | Categoría | Descripción |
+|---|---|---|
+| `server_status` | Jellyfin | Obtener información del servidor, uso de disco, estadísticas por biblioteca, sesiones activas y usuarios |
+| `activity_log` | Jellyfin | Ver actividad reciente incluyendo reproducciones, inicios de sesión y cambios en la biblioteca |
+| `search_media` | Jellyfin | Buscar y listar contenido con paginación y filtrado por tipo |
+| `show_details` | Jellyfin | Obtener detalles de una serie con listado completo de temporadas y episodios |
+| `manage_library` | Biblioteca | Crear, escanear o refrescar bibliotecas de Jellyfin |
+| `manage_files` | Biblioteca | Listar, mover o eliminar archivos en el servidor multimedia |
+| `rename_episodes` | Biblioteca | Renombrar episodios en lote a un formato de nomenclatura estándar |
+| `fix_subtitles` | Biblioteca | Convertir subtítulos ASS/SSA a SRT dentro de contenedores MKV |
+| `series_search` | Sonarr | Buscar series de TV y opcionalmente agregarlas a Sonarr |
+| `series_status` | Sonarr | Ver series monitoreadas, calendario, episodios faltantes, cola e historial |
+| `series_remove` | Sonarr | Eliminar una serie de Sonarr |
+| `series_releases` | Sonarr | Buscar releases disponibles para un episodio o temporada específica |
+| `series_grab` | Sonarr | Descargar un release específico y cancelar duplicados automáticamente |
+| `movie_search` | Radarr | Buscar películas y opcionalmente agregarlas a Radarr |
+| `movie_status` | Radarr | Ver películas monitoreadas, cola de descarga e historial |
+| `movie_remove` | Radarr | Eliminar una película de Radarr |
+| `movie_releases` | Radarr | Buscar releases disponibles para una película |
+| `movie_grab` | Radarr | Descargar un release específico con prevención de duplicados |
+| `download_add` | Descargas | Agregar URLs al gestor de descargas PyLoad |
+| `download_status` | Descargas | Consultar estado de la cola, organizar descargas completadas o eliminar paquetes |
+| `download_direct` | Descargas | Descargar archivos via aria2c (HTTP) o yt-dlp (YouTube) |
+| `cancel_downloads` | Descargas | Cancelar descargas en colas de Sonarr, Radarr, torrent o huérfanas |
+| `optimize_media` | Mantenimiento | Analizar o eliminar pistas de audio/subtítulos de archivos MKV |
+| `cleanup_server` | Mantenimiento | Limpiar cachés, archivos temporales y torrents huérfanos |
+| `check_jobs` | Mantenimiento | Listar tareas activas y completadas en segundo plano con progreso |
+
+## Siguientes Pasos
+
+Selecciona una categoría de la lista anterior para ver la documentación completa de parámetros y ejemplos de uso de cada herramienta.

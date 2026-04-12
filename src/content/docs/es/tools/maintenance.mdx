@@ -1,0 +1,76 @@
+---
+title: "Herramientas de Mantenimiento"
+description: "Herramientas para optimizar archivos multimedia, limpiar el servidor y monitorear tareas en segundo plano."
+category: "tools"
+order: 7
+locale: "es"
+draft: false
+---
+
+
+Estas tres herramientas gestionan el mantenimiento continuo del servidor -- optimizar archivos multimedia eliminando pistas no deseadas, limpiar cachés y datos huérfanos, y monitorear el progreso de tareas en segundo plano.
+
+---
+
+## optimize_media
+
+Analizar o eliminar pistas de audio y subtítulos no deseadas de archivos MKV para ahorrar espacio. Funciona en un solo archivo o una carpeta completa (lote). Lotes grandes (más de 3 archivos) se ejecutan como tarea en segundo plano.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `mediaPath` | string | Sí | Ruta a un archivo multimedia o carpeta (ej. "anime/Invincible (2021)" o ruta completa "/data/anime/Invincible (2021)"). |
+| `action` | enum | No | `analyze` (por defecto) para mostrar pistas, u `optimize` para eliminar pistas no deseadas. |
+| `keepAudioLangs` | string[] | No | Códigos de idioma de audio a conservar (ej. `["spa", "eng", "jpn"]`). Los demás se eliminan. Omitir para conservar todos. |
+| `keepSubLangs` | string[] | No | Códigos de idioma de subtítulos a conservar (ej. `["spa", "eng"]`). Los demás se eliminan. Omitir para conservar todos. |
+| `removeAllSubs` | boolean | No | Eliminar TODAS las pistas de subtítulos. Por defecto `false`. |
+
+### Acciones
+
+- **analyze** -- Listar todas las pistas de audio y subtítulos en el/los archivo(s) MKV objetivo, incluyendo idioma, códec, canales y metadatos de pista.
+- **optimize** -- Eliminar pistas de audio y subtítulos que no coincidan con las listas de conservación especificadas. Las pistas de video siempre se preservan. Los archivos donde nada cambiaría se omiten.
+
+### Ejemplo de Uso
+
+> "Analiza las pistas en anime/Invincible (2021)."
+
+> "Optimiza movies/Movie (2024) conservando solo audio en inglés y español y subtítulos en inglés."
+
+> "Elimina todos los subtítulos de tv/Show/Season 01."
+
+---
+
+## cleanup_server
+
+Limpiar el servidor: eliminar caché de Jellyfin, archivos temporales, descargas huérfanas, entradas fantasma en Sonarr/Radarr y torrents completados de qBittorrent. Ejecuta todas las operaciones de limpieza cada vez -- no hay selector de acción.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `dryRun` | boolean | No | Previsualizar qué se limpiaría sin eliminar nada. Por defecto `true`. |
+
+### Ejemplo de Uso
+
+> "Haz una prueba de limpieza del servidor."
+
+> "Ejecuta la limpieza del servidor de verdad."
+
+---
+
+## check_jobs
+
+Consultar el estado de operaciones en segundo plano (movimiento de archivos, optimizaciones de medios, etc.). Devuelve progreso y resultados de tareas en ejecución o completadas.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `jobId` | string | No | ID de tarea específico a consultar. Omitir para ver todas las tareas activas. |
+
+### Ejemplo de Uso
+
+> "¿Hay alguna tarea en segundo plano ejecutándose?"
+
+> "Consulta el estado de la tarea abc123."

@@ -1,0 +1,81 @@
+---
+title: "Prerrequisitos"
+description: "Requisitos del sistema y dependencias necesarias antes de instalar Mediabox MCP."
+category: "getting-started"
+order: 2
+locale: "es"
+draft: false
+---
+
+
+Antes de configurar Mediabox MCP, asegurate de que tu sistema cumpla con los siguientes requisitos.
+
+## Software Requerido
+
+| Software | Version Minima | Proposito |
+|---|---|---|
+| **Docker** | 20.10+ | Ejecuta todos los servicios multimedia como contenedores |
+| **Docker Compose** | 2.0+ (plugin V2) | Orquesta el stack multi-contenedor |
+| **Node.js** | 20.0+ | Ejecuta el asistente de configuracion (`npx create-mediabox`) |
+
+### Instalacion de Docker
+
+Sigue la guia de instalacion oficial para tu plataforma:
+
+- **Linux**: [docs.docker.com/engine/install](https://docs.docker.com/engine/install/)
+- **macOS**: [Docker Desktop para Mac](https://docs.docker.com/desktop/install/mac-install/)
+- **Windows**: [Docker Desktop para Windows](https://docs.docker.com/desktop/install/windows-install/)
+
+Verifica tu instalacion:
+
+```bash
+docker --version
+docker compose version
+```
+
+### Instalacion de Node.js
+
+Se requiere Node.js 20 o superior para ejecutar el asistente de configuracion. Puedes instalarlo mediante:
+
+- **Instalador oficial**: [nodejs.org](https://nodejs.org/)
+- **nvm (recomendado)**:
+  ```bash
+  nvm install 20
+  nvm use 20
+  ```
+
+Verifica tu instalacion:
+
+```bash
+node --version
+```
+
+## Requisitos de Hardware
+
+| Recurso | Minimo | Recomendado |
+|---|---|---|
+| **RAM** | 2 GB | 4 GB+ |
+| **Espacio en disco** | 20 GB | 100 GB+ (depende del tamano de la biblioteca) |
+| **CPU** | 2 nucleos | 4 nucleos+ (para transcodificacion) |
+
+El requisito de espacio en disco es para el stack en si mas una biblioteca multimedia modesta. Tus necesidades reales dependeran de cuanto contenido planees almacenar. Planifica almacenamiento adicional en consecuencia.
+
+## Acceso a Red
+
+Mediabox MCP requiere acceso a red para:
+
+- **Descargar imagenes Docker** durante la configuracion inicial
+- **Descargar contenido multimedia** a traves de indexadores y trackers de torrent configurados
+- **Acceso al servidor MCP** -- tu cliente de IA necesita alcanzar el endpoint del servidor MCP (local o remoto)
+
+### Requisitos Segun el Modo de Despliegue
+
+| Modo de Despliegue | Requisitos de Red |
+|---|---|
+| **Local** | Sin requisitos especiales. Los servicios son accesibles en `localhost`. |
+| **Dominio (proxy inverso)** | Un nombre de dominio apuntando a tu servidor, puertos 80/443 abiertos. |
+| **Cloudflare Tunnel** | Una cuenta de Cloudflare y un token de tunnel. No se requieren puertos abiertos. |
+
+## Siguientes Pasos
+
+Una vez que tu sistema cumpla con estos requisitos, continua con la guia de [Inicio Rapido](/es/docs/getting-started/quick-start).

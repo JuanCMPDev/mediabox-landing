@@ -1,0 +1,81 @@
+---
+title: "Prerequisites"
+description: "System requirements and dependencies needed before installing Mediabox MCP."
+category: "getting-started"
+order: 2
+locale: "en"
+draft: false
+---
+
+
+Before setting up Mediabox MCP, make sure your system meets the following requirements.
+
+## Required Software
+
+| Software | Minimum Version | Purpose |
+|---|---|---|
+| **Docker** | 20.10+ | Runs all media services as containers |
+| **Docker Compose** | 2.0+ (V2 plugin) | Orchestrates the multi-container stack |
+| **Node.js** | 20.0+ | Runs the setup wizard (`npx create-mediabox`) |
+
+### Installing Docker
+
+Follow the official installation guide for your platform:
+
+- **Linux**: [docs.docker.com/engine/install](https://docs.docker.com/engine/install/)
+- **macOS**: [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+- **Windows**: [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
+
+Verify your installation:
+
+```bash
+docker --version
+docker compose version
+```
+
+### Installing Node.js
+
+Node.js 20 or later is required to run the setup wizard. You can install it via:
+
+- **Official installer**: [nodejs.org](https://nodejs.org/)
+- **nvm (recommended)**:
+  ```bash
+  nvm install 20
+  nvm use 20
+  ```
+
+Verify your installation:
+
+```bash
+node --version
+```
+
+## Hardware Requirements
+
+| Resource | Minimum | Recommended |
+|---|---|---|
+| **RAM** | 2 GB | 4 GB+ |
+| **Disk space** | 20 GB | 100 GB+ (depends on media library size) |
+| **CPU** | 2 cores | 4 cores+ (for transcoding) |
+
+The disk space requirement is for the stack itself plus a modest media library. Your actual needs will depend on how much content you plan to store. Plan additional storage accordingly.
+
+## Network Access
+
+Mediabox MCP requires network access for:
+
+- **Pulling Docker images** during initial setup
+- **Downloading media** through configured indexers and torrent trackers
+- **MCP server access** -- your AI client needs to reach the MCP server endpoint (local or remote)
+
+### Deployment-Specific Requirements
+
+| Deployment Mode | Network Requirements |
+|---|---|
+| **Local** | No special requirements. Services are accessible on `localhost`. |
+| **Domain (reverse proxy)** | A domain name pointing to your server, ports 80/443 open |
+| **Cloudflare Tunnel** | A Cloudflare account and tunnel token. No open ports required. |
+
+## Next Steps
+
+Once your system meets these requirements, proceed to the [Quick Start](/docs/getting-started/quick-start) guide.

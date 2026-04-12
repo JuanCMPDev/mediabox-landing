@@ -1,0 +1,85 @@
+---
+title: "Jellyfin Tools"
+description: "Tools for querying Jellyfin server status, browsing activity, searching media, and viewing show details."
+category: "tools"
+order: 2
+locale: "en"
+draft: false
+---
+
+
+These four tools interact with the Jellyfin media server to query status, browse activity logs, search your media library, and inspect TV show details.
+
+---
+
+## server_status
+
+Complete server overview: Jellyfin info, disk usage, per-library stats (series/movies/episodes counts), active streaming sessions, and registered users.
+
+### Parameters
+
+This tool takes no parameters.
+
+### Usage Example
+
+> "What's the current status of my media server?"
+
+---
+
+## activity_log
+
+Recent server activity: who watched what, logins, library changes, and other server events.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `limit` | number | No | Number of entries to return. Defaults to `15`. |
+
+### Usage Example
+
+> "Show me the last 10 things that happened on Jellyfin."
+
+---
+
+## search_media
+
+Search or list content in the Jellyfin library. Omit `query` to list all items of a type. Use `offset` to paginate through large result sets.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `query` | string | No | Search term. Omit to list all items. |
+| `type` | string | No | Filter by media type. One of: `Movie`, `Series`, `Episode`, `Audio`. |
+| `limit` | number | No | Maximum number of results to return. Defaults to `50`. |
+| `offset` | number | No | Skip this many results for pagination. Defaults to `0`. |
+
+### Usage Example
+
+> "List all movies in my library."
+
+> "Search for 'Breaking Bad' in my library."
+
+> "Show me the next 50 results starting from offset 50."
+
+---
+
+## show_details
+
+Get detailed info about a TV show including seasons and episodes. For large series, use `seasonNumber` to fetch one season at a time, or `page`/`pageSize` to paginate episodes.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `showId` | string | Yes | Jellyfin item ID of the show. |
+| `seasonNumber` | number | No | Return only this season number (recommended for large series). |
+| `page` | number | No | Page number (1-based). Defaults to `1`. |
+| `pageSize` | number | No | Episodes per page. Defaults to `50`. |
+
+### Usage Example
+
+> "Show me the episode list for Breaking Bad season 3."
+
+> "What seasons are available for The Office?"

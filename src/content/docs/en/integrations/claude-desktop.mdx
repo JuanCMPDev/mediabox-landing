@@ -1,0 +1,82 @@
+---
+title: "Claude Desktop"
+description: "Connect Mediabox MCP to Claude Desktop for AI-powered media management through natural conversation."
+category: "integrations"
+order: 1
+locale: "en"
+draft: false
+---
+
+**Claude Desktop** is the primary way to interact with Mediabox MCP. Once connected, you can search for movies, trigger downloads, check progress, and manage your entire media library through natural language using the **25 MCP tools**.
+
+## Prerequisites
+
+- [Claude Desktop](https://claude.ai/download) installed
+- Mediabox MCP stack running and accessible (locally or via a public URL)
+
+## Configuration
+
+Open your Claude Desktop configuration file:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add the Mediabox MCP server to the `mcpServers` section:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "https://media.example.com/mcp"
+    }
+  }
+}
+```
+
+Replace `https://media.example.com` with your actual MCP server URL (the `MCP_PUBLIC_URL` from your `.env` file). For local deployments, use:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+> You only need the `url` field. Claude Desktop automatically detects the Streamable HTTP transport and handles the connection.
+
+## Authentication
+
+Mediabox MCP uses **OAuth2** for authentication. When Claude Desktop connects to the MCP server for the first time:
+
+1. Claude Desktop detects the OAuth2 requirement automatically
+2. A browser window opens for authorization
+3. You approve the connection
+4. The OAuth2 token is stored locally -- you will not need to re-authenticate until it expires (24 hours for access tokens, 30 days for refresh tokens)
+
+No manual token management is required. The entire flow is handled by the MCP protocol's built-in OAuth2 support.
+
+## Using Mediabox Tools
+
+After connecting, Claude has access to all 25 Mediabox MCP tools. You can interact naturally:
+
+- *"Search for The Expanse on Sonarr and add it"*
+- *"What movies are currently downloading?"*
+- *"Show me my Jellyfin library stats"*
+- *"Add the movie Dune Part Two in 4K"*
+
+Claude will select and invoke the appropriate MCP tools behind the scenes.
+
+## Verifying the Connection
+
+In Claude Desktop, start a new conversation and ask:
+
+> *"What's the server status?"*
+
+Claude should use the `server_status` tool and return your Jellyfin server info, disk usage, and library stats. If the tools do not appear, check that:
+
+- The MCP server is running (`docker ps` should show the `mcp-server` container)
+- The URL in your config is correct and reachable
+- You completed the OAuth2 authentication flow

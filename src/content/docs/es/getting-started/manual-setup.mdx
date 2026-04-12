@@ -1,0 +1,163 @@
+---
+title: "Configuracion Manual"
+description: "Guia paso a paso para configurar Mediabox MCP manualmente sin el asistente interactivo."
+category: "getting-started"
+order: 4
+locale: "es"
+draft: false
+---
+
+Si prefieres tener control total sobre el proceso de configuracion, puedes configurar **Mediabox MCP** manualmente usando **Docker Compose** y variables de entorno.
+
+## 1. Clonar el Repositorio
+
+```bash
+git clone https://github.com/JuanCMPDev/mediabox-mcp.git
+cd mediabox-mcp
+```
+
+## 2. Crear el Archivo de Entorno
+
+Copia el archivo de entorno de ejemplo:
+
+```bash
+cp .env.example .env
+```
+
+## 3. Editar las Variables de Entorno
+
+Abre `.env` en tu editor y completa los valores requeridos:
+
+```env
+# Modo de despliegue: local o vps
+DEPLOYMENT_MODE=local
+
+# Zona horaria
+TZ=America/Mexico_City
+
+# Dominio (solo para modo VPS)
+# BASE_DOMAIN=media.ejemplo.com
+
+# Claves API de servicios (dejar vacias por ahora — se extraen despues del primer arranque)
+JELLYFIN_API_KEY=
+SONARR_API_KEY=
+RADARR_API_KEY=
+
+# Contrasena de qBittorrent (minimo 8 caracteres)
+QBIT_PASSWORD=tu-contrasena-segura
+
+# Credenciales de PyLoad
+PYLOAD_USER=pyload
+PYLOAD_PASSWORD=pyload
+
+# Servidor MCP
+MCP_PUBLIC_URL=http://localhost:3000
+MCP_AUTH_SECRET=cadena-hex-aleatoria-de-32-caracteres
+INTERNAL_API_KEY=cadena-hex-aleatoria-de-32-caracteres
+```
+
+> Las claves API de Jellyfin, Sonarr y Radarr son **auto-generadas por cada servicio** en su primer arranque. Las extraeras en el paso 5.
+
+Para una lista completa de variables, consulta [Variables de Entorno](/es/docs/configuration/environment-variables).
+
+## 4. Iniciar el Stack
+
+```bash
+docker compose up -d
+```
+
+Esto descarga todas las imagenes Docker necesarias e inicia los servicios. La primera ejecucion puede tardar varios minutos.
+
+Verifica que todos los contenedores esten en ejecucion:
+
+```bash
+docker compose ps
+```
+
+## 5. Extraer las Claves API
+
+Cada servicio genera su propia clave API en el primer arranque. Extraelas de los archivos de configuracion:
+
+```bash
+# Clave API de Sonarr
+grep -oP '<ApiKey>\K[^<]+' config/sonarr/config.xml
+
+# Clave API de Radarr
+grep -oP '<ApiKey>\K[^<]+' config/radarr/config.xml
+```
+
+Alternativamente, encuentra las claves API en la interfaz web de cada servicio en **Settings > General**.
+
+Actualiza tu archivo `.env` con las claves extraidas:
+
+```env
+JELLYFIN_API_KEY=clave-extraida
+SONARR_API_KEY=clave-extraida
+RADARR_API_KEY=clave-extraida
+```
+
+Luego recrea el contenedor del servidor MCP para que tome las nuevas variables:
+
+```bash
+docker compose up -d --force-recreate mcp-server
+```
+
+## 6. Configurar Jellyfin
+
+1. Abre Jellyfin en `http://localhost:8096`
+2. Completa el asistente inicial (crear usuario admin, configurar idioma)
+3. Crea bibliotecas multimedia apuntando a: `/data/movies`, `/data/tv`, `/data/anime`, `/data/music`
+4. Ve a **Dashboard > API Keys** y crea una clave API — actualiza tu `.env` con esta clave
+
+## 7. Configurar Sonarr
+
+1. Abre Sonarr en `http://localhost:8989`
+2. Ve a **Settings > Download Clients** y agrega **qBittorrent**:
+   - Host: `qbittorrent`
+   - Puerto: `8085`
+   - Username: `admin`
+   - Password: el valor de `QBIT_PASSWORD` de tu `.env`
+3. Ve a **Settings > Media Management** y agrega carpetas raiz:
+   - `/data/tv` para series
+   - `/data/anime` para anime (si usas biblioteca separada)
+
+## 8. Configurar Radarr
+
+1. Abre Radarr en `http://localhost:7878`
+2. Ve a **Settings > Download Clients** y agrega **qBittorrent** (misma configuracion que Sonarr)
+3. Ve a **Settings > Media Management** y agrega carpeta raiz:
+   - `/data/movies`
+
+## 9. Configurar Prowlarr
+
+1. Abre Prowlarr en `http://localhost:9696`
+2. Configura la autenticacion en **Settings > General**
+3. En **Settings > Apps**, agrega Sonarr y Radarr:
+   - **Sonarr**: Prowlarr URL `http://prowlarr:9696`, Base URL `http://sonarr:8989`, clave API de Sonarr
+   - **Radarr**: Prowlarr URL `http://prowlarr:9696`, Base URL `http://radarr:7878`, clave API de Radarr
+4. **Agregar indexadores** -- Navega a **Indexers > Add Indexer** y agrega tus trackers de torrents preferidos
+5. **Configurar FlareSolverr** (si usas indexadores con proteccion Cloudflare):
+   - Ve a **Settings > Indexer Proxies** > agrega FlareSolverr con URL `http://flaresolverr:8191/`
+   - Crea un tag llamado `flaresolverr` en **Indexers > Tags**
+   - Asigna el tag tanto al proxy FlareSolverr como a los indexadores que lo necesiten
+
+## 10. Conectar tu Cliente de IA
+
+Agrega el servidor MCP a la configuracion de tu cliente de IA:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+Si usas modo VPS con dominio, reemplaza con tu `MCP_PUBLIC_URL`. La autenticacion OAuth2 se maneja automaticamente.
+
+## Siguientes Pasos
+
+- [Variables de Entorno](/es/docs/configuration/environment-variables) -- Referencia completa de todas las opciones de configuracion
+- [Docker Compose](/es/docs/configuration/docker-compose) -- Comprende y personaliza el stack de servicios

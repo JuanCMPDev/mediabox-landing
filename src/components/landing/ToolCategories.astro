@@ -1,0 +1,35 @@
+---
+import Tabs from '../ui/Tabs.tsx';
+import { toolCategories } from '../../data/tools';
+import { useTranslations, type Locale } from '../../i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const locale = (Astro.props.locale ?? 'en') as Locale;
+const t = useTranslations(locale);
+const isEs = locale === 'es';
+
+const tabs = toolCategories.map((cat) => ({
+  id: cat.id,
+  label: t.tools[cat.id as keyof typeof t.tools] as string,
+  color: cat.color,
+  content: cat.tools.map((tool) => ({
+    name: tool.name,
+    description: isEs ? tool.descriptionEs : tool.description,
+  })),
+}));
+---
+
+<section class="relative py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6">
+    <!-- Section header -->
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight gradient-text">{t.tools.title}</h2>
+      <p class="mt-4 text-lg text-text-secondary">{t.tools.subtitle}</p>
+    </div>
+
+    <Tabs tabs={tabs} badge={t.tools.badge} client:visible />
+  </div>
+</section>

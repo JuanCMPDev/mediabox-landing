@@ -1,0 +1,116 @@
+---
+title: "Architecture"
+description: "System architecture overview of Mediabox MCP -- services, networking, transport, and tool domains."
+category: "reference"
+order: 1
+locale: "en"
+draft: false
+---
+
+This page describes the high-level architecture of Mediabox MCP, including how services communicate over the **Docker** network, how the **MCP server** handles requests, and how clients interact with the system.
+
+## System Overview
+
+**MCP Clients** (Claude Desktop, Telegram, etc.) connect to the **MCP Server** via OAuth2 + Streamable HTTP. The MCP Server then makes internal API calls to all backend services within the Docker network.
+
+### Request Flow
+
+> **Client** → MCP Server (:3000) → Backend Services → Shared Media Volumes
+
+### Services in the Stack
+
+| Layer | Services | Role |
+|-------|----------|------|
+| **Gateway** | MCP Server (:3000) | Receives AI client requests via OAuth2 / Streamable HTTP, orchestrates all backend calls |
+| **Media** | Jellyfin (:8096) | Media streaming, library management, metadata |
+| **Automation** | Sonarr (:8989), Radarr (:7878) | TV and movie search, monitoring, importing |
+| **Indexing** | Prowlarr (:9696), FlareSolverr (:8191) | Torrent indexer management, Cloudflare bypass |
+| **Downloads** | qBittorrent (:8085), PyLoad (:8000) | Torrent and direct file downloads |
+| **Storage** | `/data/*`, `/downloads` | Shared media library and download staging |
+
+## MCP Server
+
+The MCP server is the central hub that exposes all media management capabilities to AI clients. It communicates with each backend service via their internal Docker APIs.
+
+### Core Stack
+
+- **Express.js** -- HTTP server framework
+- **Streamable HTTP transport** -- MCP protocol transport layer at the `/mcp` endpoint
+- **OAuth2 authentication** -- secures the endpoint; tokens expire after 24 hours (access) and 30 days (refresh)
+- **Health endpoint** -- `/health` returns server status
+
+### Tool Domains
+
+The MCP server provides **25 tools** organized into **6 domains**:
+
+| Domain | Tools | Services Used | Description |
+| --- | --- | --- | --- |
+| **Jellyfin** | 4 | Jellyfin | Server status, activity logs, media search, show details |
+| **Library** | 4 | Jellyfin, filesystem | Library management, file operations, episode renaming, subtitle fixing |
+| **Sonarr** | 5 | Sonarr | TV series search, monitoring, releases, downloads |
+| **Radarr** | 5 | Radarr | Movie search, monitoring, releases, downloads |
+| **Downloads** | 4 | PyLoad, qBittorrent, yt-dlp, aria2c | Add downloads, check status, direct downloads, cancel queues |
+| **Maintenance** | 3 | ffmpeg, filesystem, qBittorrent | Media optimization, server cleanup, job tracking |
+
+> The MCP server does **not** expose Prowlarr, qBittorrent, or FlareSolverr as direct tool domains. Instead, it interacts with them indirectly through the Sonarr, Radarr, and Downloads tools.
+
+### Background Job Management
+
+Long-running operations (file moves, media optimization, subtitle conversion) run as background jobs. The MCP server tracks their progress and reports status via the `check_jobs` tool. Each job has an ID, progress percentage, and ETA.
+
+## Docker Network
+
+All services run on the `mediabox-net` Docker bridge network. Services communicate using container names as hostnames:
+
+| Service | Internal URL |
+| --- | --- |
+| Jellyfin | `http://jellyfin:8096` |
+| MCP Server | `http://mcp-server:3000` |
+| Sonarr | `http://sonarr:8989` |
+| Radarr | `http://radarr:7878` |
+| qBittorrent | `http://qbittorrent:8085` |
+| PyLoad | `http://pyload:8000` |
+| Prowlarr | `http://prowlarr:9696` |
+| FlareSolverr | `http://flaresolverr:8191` |
+
+- **Internal traffic** stays within the Docker network
+- **External access** is controlled by the deployment mode (local ports, Caddy reverse proxy, or Cloudflare Tunnel)
+- **API keys** are extracted from service configs during setup and injected via environment variables
+
+## Media Volumes
+
+The stack uses two separate volume areas:
+
+### Media Library (`/data`)
+
+Mounted from `./media/` on the host. Shared between Jellyfin, Sonarr, Radarr, and the MCP server:
+
+| Path | Content | Managed By |
+|------|---------|------------|
+| `/data/movies` | Movies | Radarr |
+| `/data/tv` | TV shows | Sonarr |
+| `/data/anime` | Anime | Sonarr |
+| `/data/music` | Music | -- |
+
+### Downloads (`/downloads`)
+
+Mounted from `./downloads/` on the host. Shared between qBittorrent, PyLoad, and the MCP server:
+
+- qBittorrent and PyLoad download files here
+- Sonarr and Radarr import from here to the media library
+- The MCP server's `download_direct` tool also saves here before organizing
+
+## Authentication Flow
+
+The MCP server uses **OAuth2** for external clients. The flow works as follows:
+
+| Step | Client | MCP Server |
+|------|--------|------------|
+| 1 | Sends `POST /mcp` | Responds with `401` + OAuth2 metadata (at `/.well-known/oauth-authorization-server`) |
+| 2 | Initiates OAuth2 authorization | Auto-approves and returns auth code (no login page) |
+| 3 | Exchanges auth code for tokens | Returns access token (24h) + refresh token (30 days) |
+| 4 | Sends `POST /mcp` with Bearer token | Returns tool results |
+
+The OAuth2 provider uses an **in-memory** store -- tokens are lost on server restart, requiring re-authentication. MCP-compatible clients handle this automatically.
+
+The **Telegram bot** does not use OAuth2. It authenticates via the `INTERNAL_API_KEY` environment variable since it runs within the same Docker network.

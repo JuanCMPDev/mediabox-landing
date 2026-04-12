@@ -1,0 +1,48 @@
+---
+title: "Introduction"
+description: "What is Mediabox MCP, who it's for, and an overview of its key features."
+category: "getting-started"
+order: 1
+locale: "en"
+draft: false
+---
+
+
+Mediabox MCP is a self-hosted media server stack that combines best-in-class open-source tools into a single, cohesive deployment -- and exposes them all through an AI-powered MCP (Model Context Protocol) server.
+
+## What is Mediabox MCP?
+
+At its core, Mediabox MCP bundles the following services into one Docker Compose stack:
+
+- **Jellyfin** -- Media streaming server (movies, TV shows, music)
+- **Sonarr** -- Automated TV show management and downloading
+- **Radarr** -- Automated movie management and downloading
+- **qBittorrent** -- BitTorrent client for media downloads
+- **PyLoad** -- Direct download manager
+- **Prowlarr** -- Indexer manager for Sonarr and Radarr
+- **FlareSolverr** -- Proxy server to bypass Cloudflare protection on indexer sites
+
+On top of this stack, Mediabox MCP provides an **MCP server with 25 AI tools** that let you manage your entire media library through natural language -- search for content, trigger downloads, monitor progress, manage libraries, and more.
+
+## Who is it for?
+
+Mediabox MCP is designed for:
+
+- **Home media enthusiasts** who want a fully automated media server with minimal configuration
+- **AI-first users** who want to manage their media library through conversational AI clients (Claude, ChatGPT, etc.)
+- **Self-hosters** who value privacy and control over their media infrastructure
+- **Developers** who want to extend or integrate media management into their own tools
+
+## Key Features
+
+- **One-command setup** -- Get the entire stack running with `npx create-mediabox`
+- **25 AI tools** -- Search, download, monitor, and manage media through any MCP-compatible AI client
+- **Auto-configuration** -- Services are pre-wired to talk to each other out of the box
+- **Flexible deployment** -- Run locally, on a VPS with reverse proxy, or behind a Cloudflare Tunnel
+- **Secure by default** -- API keys, authentication, and internal networking are configured automatically
+
+## Next Steps
+
+Ready to get started? Head to the [Quick Start](/docs/getting-started/quick-start) guide to have your media server running in minutes.
+
+If you want to check system requirements first, see [Prerequisites](/docs/getting-started/prerequisites).

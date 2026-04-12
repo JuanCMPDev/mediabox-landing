@@ -1,0 +1,140 @@
+---
+title: "Herramientas de Sonarr"
+description: "Herramientas para buscar, monitorear y descargar series de TV a través de Sonarr."
+category: "tools"
+order: 4
+locale: "es"
+draft: false
+---
+
+
+Estas cinco herramientas gestionan series de TV a través de Sonarr -- buscar nuevas series, monitorear su estado, explorar releases disponibles y ejecutar descargas.
+
+---
+
+## series_search
+
+Buscar una serie de TV y opcionalmente agregarla a Sonarr para monitoreo. Usa `searchNow=false` (el valor por defecto) para agregar sin descargar automáticamente, permitiéndote elegir un release manualmente via `series_releases` + `series_grab`.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `query` | string | No | Nombre de la serie a buscar. Requerido para búsqueda, opcional al agregar por ID. |
+| `addTvdbId` | number | No | ID de TVDB a agregar (de los resultados de búsqueda). Omitir para solo buscar. |
+| `rootFolder` | string | No | Ruta de la carpeta raíz. Uno de `"/tv"`, `"/anime"`. Por defecto `"/tv"`. |
+| `monitor` | string | No | Estrategia de monitoreo. Uno de `"all"`, `"future"`, `"missing"`, `"none"`, `"firstSeason"`, `"lastSeason"`. Por defecto `"all"`. |
+| `seasons` | number[] | No | Números de temporada específicos a monitorear. |
+| `quality` | string | No | Nombre del perfil de calidad. Uno de `"Any"`, `"SD"`, `"HD-720p"`, `"HD-1080p"`, `"Ultra-HD"`, `"HD - 720p/1080p"`. Por defecto `"HD-1080p"`. |
+| `searchNow` | boolean | No | Ejecutar búsqueda automática de descarga después de agregar. Por defecto `false`. |
+
+### Ejemplo de Uso
+
+> "Busca 'Severance' en Sonarr."
+
+> "Agrega TVDB 403245 a Sonarr como anime con calidad HD-1080p."
+
+> "Agrega The Bear y monitorea solo la temporada 3, no busques todavía."
+
+---
+
+## series_status
+
+Ver series monitoreadas, calendario, episodios faltantes, cola, historial de descargas o listar episodios de una serie/temporada específica.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `view` | string | No | La vista a mostrar. Uno de `"series"`, `"episodes"`, `"calendar"`, `"missing"`, `"queue"`, `"history"`. Por defecto `"series"`. |
+| `seriesId` | number | No | ID de serie en Sonarr (o tvdbId -- se resuelve automáticamente). Requerido para la vista `"episodes"`. |
+| `seasonNumber` | number | No | Filtrar episodios por número de temporada (para la vista `"episodes"`). |
+| `page` | number | No | Número de página (comienza en 1, para vistas episodes/series). Por defecto `1`. |
+| `pageSize` | number | No | Elementos por página (para vistas episodes/series). Por defecto `50`. |
+| `limit` | number | No | Número máximo de elementos a devolver (para vistas missing/history). Por defecto `20`. |
+
+### Vistas
+
+- **series** -- Listar todas las series actualmente monitoreadas por Sonarr (paginado).
+- **episodes** -- Listar todos los episodios de un `seriesId` dado, opcionalmente filtrado por `seasonNumber`.
+- **calendar** -- Mostrar próximas fechas de emisión de episodios (próximos 14 días).
+- **missing** -- Listar episodios que están monitoreados pero aún no descargados.
+- **queue** -- Mostrar la cola de descarga actual para episodios de TV.
+- **history** -- Ver historial reciente de descargas e importaciones.
+
+### Ejemplo de Uso
+
+> "¿Qué series estoy monitoreando en Sonarr?"
+
+> "Lista los episodios de la serie 5, temporada 2."
+
+> "¿Hay episodios que se emitan esta semana?"
+
+> "Muéstrame los episodios faltantes."
+
+---
+
+## series_remove
+
+Eliminar una serie de Sonarr. Opcionalmente eliminar los archivos asociados del disco.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `seriesId` | number | Sí | El ID de serie en Sonarr a eliminar. |
+| `deleteFiles` | boolean | No | Cuando es `true`, también elimina los archivos de la serie del disco. Por defecto `false`. |
+
+### Ejemplo de Uso
+
+> "Elimina la serie 42 de Sonarr."
+
+> "Elimina The Flash de Sonarr y borra sus archivos."
+
+---
+
+## series_releases
+
+Buscar releases de torrent disponibles para un episodio o temporada. Puedes pasar `seriesId` + `seasonNumber` + `episodeNumber` para buscar un episodio específico (la herramienta resuelve el episodeId interno automáticamente). `seriesId` puede ser un ID de Sonarr o tvdbId -- ambos se resuelven automáticamente.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `episodeId` | number | No | ID interno de episodio en Sonarr (si ya lo tienes). |
+| `seriesId` | number | No | ID de serie en Sonarr o tvdbId (se resuelve automáticamente). Usar con `seasonNumber` para una temporada completa, o agregar `episodeNumber` para un episodio específico. |
+| `seasonNumber` | number | No | Número de temporada para buscar releases. |
+| `episodeNumber` | number | No | Número de episodio dentro de la temporada (ej. `6` para S04E06). Requiere `seriesId` y `seasonNumber`. |
+
+Se requiere al menos una de estas combinaciones: `episodeId` solo, `seriesId` + `seasonNumber`, o `seriesId` + `seasonNumber` + `episodeNumber`.
+
+### Ejemplo de Uso
+
+> "Busca releases para el episodio 1504."
+
+> "Encuentra descargas disponibles para Severance temporada 2."
+
+> "Muestra releases para la serie 5, temporada 4, episodio 6."
+
+---
+
+## series_grab
+
+Descargar un release de torrent específico para un episodio de serie. Cancela automáticamente cualquier descarga existente del mismo episodio para evitar duplicados. `seriesId` puede ser un ID de Sonarr o tvdbId -- ambos se resuelven automáticamente.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `guid` | string | Sí | El GUID del release a descargar (de los resultados de `series_releases`). |
+| `indexerId` | number | Sí | El ID del indexador para el release (de los resultados de `series_releases`). |
+| `episodeId` | number | No | ID interno de episodio en Sonarr. Si se proporciona, cancela cualquier descarga activa de este episodio antes de descargar. |
+| `seriesId` | number | No | ID de serie en Sonarr o tvdbId (usado con `seasonNumber` + `episodeNumber` para resolver episodeId). |
+| `seasonNumber` | number | No | Número de temporada (usado con `seriesId` y `episodeNumber`). |
+| `episodeNumber` | number | No | Número de episodio dentro de la temporada. |
+
+### Ejemplo de Uso
+
+> "Descarga el release con GUID abc123def456 del indexador 2."
+
+> "Descarga el segundo release de la lista para la serie 5, S04E06."

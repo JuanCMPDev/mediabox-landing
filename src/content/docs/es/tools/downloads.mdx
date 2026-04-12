@@ -1,0 +1,116 @@
+---
+title: "Herramientas de Descarga"
+description: "Herramientas para agregar descargas, consultar estado, descarga directa de archivos y cancelar elementos en cola."
+category: "tools"
+order: 6
+locale: "es"
+draft: false
+---
+
+
+Estas cuatro herramientas gestionan descargas en todo el stack de Mediabox -- agregar URLs a PyLoad, consultar estado de descargas, descarga directa de archivos via aria2c o yt-dlp, y gestionar colas en Sonarr, Radarr y qBittorrent.
+
+---
+
+## download_add
+
+Agregar una o más URLs al gestor de descargas PyLoad como un nuevo paquete. El nombre del paquete se convierte en el nombre de la subcarpeta en el directorio de descargas.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `urls` | string[] | Sí | Array de URLs a descargar. |
+| `packageName` | string | Sí | Nombre descriptivo (ej. "Pet Sematary 1989"). Se convierte en el nombre de la carpeta de descarga. |
+
+### Ejemplo de Uso
+
+> "Descarga estos dos enlaces de Mega y llama al paquete 'Pet Sematary 1989'."
+
+---
+
+## download_status
+
+Gestor de descargas PyLoad. Consultar la cola, organizar descargas completadas en la biblioteca de Jellyfin o eliminar paquetes.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `action` | enum | No | `status` (por defecto), `organize` o `delete`. |
+| `packageIds` | number[] | Condicional | IDs de paquetes de PyLoad a eliminar. Requerido cuando `action` es `delete`. |
+| `packageFolder` | string | Condicional | Nombre de la carpeta en /downloads/ a organizar (del campo `downloadFolders` en la respuesta de status). Requerido cuando `action` es `organize`. |
+| `showName` | string | Condicional | Nombre destino en Jellyfin (ej. "Pet Sematary (1989)"). Requerido cuando `action` es `organize`. |
+| `libraryFolder` | enum | No | Biblioteca destino: `tv`, `movies` (por defecto), `music` o `anime`. |
+| `seasonNumber` | number | No | Número de temporada (solo para tv/anime). |
+| `episodeNumber` | number | No | Número de episodio inicial (solo para tv/anime). |
+| `archivePassword` | string | No | Contraseña para archivos RAR/ZIP/7z. |
+
+### Acciones
+
+- **status** -- Mostrar la cola de PyLoad, progreso de descargas activas y listar carpetas en /downloads/ listas para organizar.
+- **organize** -- Mover archivos descargados desde una carpeta de descarga a la biblioteca de Jellyfin correspondiente. Se ejecuta como tarea en segundo plano para archivos comprimidos.
+- **delete** -- Eliminar paquetes de la cola de PyLoad por sus IDs de paquete.
+
+### Ejemplo de Uso
+
+> "¿Cuál es el estado actual de las descargas?"
+
+> "Organiza la carpeta 'Pet Sematary 1989' en películas como 'Pet Sematary (1989)'."
+
+> "Elimina los paquetes de PyLoad 12 y 15."
+
+---
+
+## download_direct
+
+Descargar un archivo desde una URL directa (o sitio de YouTube/video via yt-dlp) y organizarlo en la biblioteca de Jellyfin. Usa esto en lugar de `download_add` para enlaces HTTP directos, Google Drive y sitios soportados por YouTube. Se ejecuta como tarea en segundo plano.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `url` | string | Sí | URL directa a descargar (enlace HTTP, YouTube, Google Drive, etc.). |
+| `showName` | string | Sí | Nombre destino en Jellyfin (ej. "Tears of Steel (2012)"). |
+| `libraryFolder` | enum | No | Biblioteca destino: `tv`, `movies` (por defecto), `music` o `anime`. |
+| `seasonNumber` | number | No | Número de temporada (solo para tv/anime). |
+| `episodeNumber` | number | No | Número de episodio inicial (solo para tv/anime). |
+
+### Ejemplo de Uso
+
+> "Descarga directa https://example.com/movie.mkv como 'Tears of Steel (2012)' en películas."
+
+> "Descarga este video de YouTube como 'Big Buck Bunny (2008)': https://youtube.com/watch?v=abc123."
+
+---
+
+## cancel_downloads
+
+Gestionar colas de descarga de Sonarr, Radarr y qBittorrent. No es para PyLoad -- usa `download_status` con `action=delete` para paquetes de PyLoad.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `source` | enum | Sí | Qué cola gestionar: `sonarr`, `radarr` o `qbittorrent`. |
+| `action` | enum | No | `list` (por defecto), `cancel`, `cancel_series`, `purge_duplicates` o `clean_orphans`. |
+| `queueIds` | number[] | No | IDs de elementos en la cola de Sonarr/Radarr a cancelar (usado con `action=cancel`). |
+| `torrentHashes` | string[] | No | Hashes de torrents en qBittorrent a eliminar (usado con `action=cancel` y `source=qbittorrent`). |
+| `seriesId` | number | No | Cancelar todos los elementos en cola para este ID de serie en Sonarr (usado con `action=cancel_series`). |
+| `movieId` | number | No | Cancelar todos los elementos en cola para este ID de película en Radarr (usado con `action=cancel_series`). |
+
+### Acciones
+
+- **list** -- Mostrar todos los elementos actualmente en la cola seleccionada.
+- **cancel** -- Cancelar elementos específicos por ID de cola (Sonarr/Radarr) o hash de torrent (qBittorrent).
+- **cancel_series** -- Cancelar todos los elementos en cola que coincidan con un `seriesId` o `movieId` dado.
+- **purge_duplicates** -- Eliminar entradas duplicadas en la cola, manteniendo el elemento con mejor puntuación (solo Sonarr/Radarr).
+- **clean_orphans** -- Eliminar torrents de qBittorrent que ya no están siendo rastreados por Sonarr o Radarr.
+
+### Ejemplo de Uso
+
+> "Lista la cola de descarga de Sonarr."
+
+> "Cancela los elementos 45 y 67 de la cola de Radarr."
+
+> "Limpia los torrents huérfanos en qBittorrent."

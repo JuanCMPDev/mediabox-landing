@@ -1,0 +1,121 @@
+---
+title: "Bot de Telegram"
+description: "Configura el bot opcional de Telegram para controlar Mediabox MCP desde cualquier chat de Telegram."
+category: "integrations"
+order: 2
+locale: "es"
+draft: false
+---
+
+Mediabox MCP incluye una integracion opcional con un **bot de Telegram**. El bot se conecta a un **proveedor LLM** (OpenRouter o Google Gemini) y utiliza las **herramientas MCP** para gestionar tu biblioteca multimedia -- todo desde un chat de Telegram.
+
+## Como Funciona
+
+El bot de Telegram actua como puente entre Telegram y el servidor MCP:
+
+1. Envias un mensaje en Telegram (por ejemplo, *"Descarga la pelicula Oppenheimer"*)
+2. El bot reenvia tu mensaje a un LLM (via OpenRouter o Google Gemini)
+3. El LLM decide que herramientas MCP llamar y las ejecuta
+4. El resultado se envia de vuelta a tu chat de Telegram
+
+El historial de conversacion se mantiene con un **TTL de 2 horas**, para que el bot recuerde el contexto dentro de una sesion. El prompt del sistema del bot esta en **espanol** y prioriza lanzamientos en Latino/Espanol al seleccionar torrents.
+
+## Requisitos Previos
+
+- Stack de Mediabox MCP corriendo
+- Una cuenta de Telegram
+- Una clave API de uno de los proveedores LLM soportados
+
+## Configuracion Durante la Instalacion
+
+El bot de Telegram se configura durante el asistente `npx create-mediabox`. Cuando se te pregunte **"Enable Telegram bot?"**, selecciona **Yes** y proporciona:
+
+1. **Token del Bot de Telegram** -- obtenido de [@BotFather](https://t.me/BotFather)
+2. **Proveedor LLM** -- OpenRouter (recomendado) o Google Gemini
+3. **Clave API del LLM** -- de tu proveedor elegido
+4. **Modelo de OpenRouter** -- por defecto es `openai/gpt-4o` (solo si usas OpenRouter)
+5. **IDs de Usuario de Telegram Permitidos** -- lista separada por comas (dejar vacio para permitir todos)
+
+El asistente agrega el contenedor del bot de Telegram a tu `docker-compose.yml` automaticamente.
+
+> **Importante:** El contenedor del bot de Telegram solo se agrega al stack de Docker Compose si lo habilitas durante el asistente. Simplemente agregar `TELEGRAM_BOT_TOKEN` a `.env` despues no funcionara -- necesitas re-ejecutar el asistente o agregar manualmente el servicio `telegram-bot` a `docker-compose.yml`.
+
+## Configuracion Manual (Sin Asistente)
+
+Si no habilitaste el bot durante la configuracion inicial, agrega el servicio a tu `docker-compose.yml`:
+
+```yaml
+telegram-bot:
+  image: ghcr.io/juancmpdev/mediabox-telegram:latest
+  container_name: telegram-bot
+  networks:
+    - mediabox-net
+  environment:
+    - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    - MCP_SERVER_URL=http://mcp-server:3000/mcp
+    - ALLOWED_TELEGRAM_USERS=${ALLOWED_TELEGRAM_USERS}
+    - MCP_INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    - LLM_PROVIDER=openrouter
+    - LLM_MODEL=${LLM_MODEL:-openai/gpt-4o}
+  restart: unless-stopped
+  depends_on:
+    - mcp-server
+```
+
+Luego agrega las variables necesarias a tu `.env`:
+
+```env
+TELEGRAM_BOT_TOKEN=tu-token-de-botfather
+ALLOWED_TELEGRAM_USERS=123456789,987654321
+LLM_PROVIDER=openrouter
+LLM_MODEL=openai/gpt-4o
+OPENROUTER_API_KEY=tu-clave-de-openrouter
+# O para Google Gemini:
+# LLM_PROVIDER=google
+# GOOGLE_AI_API_KEY=tu-clave-de-google
+```
+
+Inicia el bot:
+
+```bash
+docker compose up -d telegram-bot
+```
+
+### Crear un Bot de Telegram
+
+1. Abre Telegram y busca [@BotFather](https://t.me/BotFather)
+2. Envia `/newbot` y sigue las instrucciones para nombrar tu bot
+3. Copia el **token del bot** que BotFather te proporciona
+
+### Obtener tu ID de Usuario de Telegram
+
+Necesitas tu ID numerico de Telegram para restringir el acceso. Puedes obtenerlo enviando un mensaje a [@userinfobot](https://t.me/userinfobot) en Telegram.
+
+### Proveedores LLM
+
+| Proveedor | Variable de Clave API | Notas |
+| --- | --- | --- |
+| [OpenRouter](https://openrouter.ai/) | `OPENROUTER_API_KEY` | Acceso a multiples modelos (GPT, Claude, etc.). Recomendado. |
+| [Google AI](https://aistudio.google.com/) | `GOOGLE_AI_API_KEY` | Modelos Gemini |
+
+## Uso
+
+Abre tu bot en Telegram y comienza a chatear:
+
+- *"Que se esta descargando ahora?"*
+- *"Busca Breaking Bad y agregala a Sonarr"*
+- *"Muestrame las peliculas recientes en Jellyfin"*
+- *"Descarga el ultimo episodio de One Piece"*
+
+El bot utiliza las mismas 25 herramientas MCP disponibles para Claude Desktop y otros clientes.
+
+## Seguridad
+
+- **`ALLOWED_TELEGRAM_USERS`** restringe el acceso al bot a IDs de usuario de Telegram especificos. Los mensajes de usuarios no autorizados son ignorados.
+- El bot se autentica con el servidor MCP usando la **`INTERNAL_API_KEY`** (no OAuth2), ya que se ejecuta dentro de la red Docker.
+- Las claves API del LLM se almacenan en el archivo `.env` y nunca se exponen a Telegram.
+
+## Historial de Conversacion
+
+El bot mantiene el contexto de la conversacion con un **TTL de 2 horas**. Despues de 2 horas de inactividad, la conversacion se reinicia. Esto mantiene al bot responsivo mientras permite interacciones de multiples turnos dentro de una sesion.

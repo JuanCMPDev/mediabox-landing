@@ -1,0 +1,120 @@
+---
+title: "Cloudflare Tunnel"
+description: "Deploy Mediabox MCP behind a Cloudflare Tunnel -- ideal for home servers behind NAT or CGNAT with no port forwarding."
+category: "deployment"
+order: 3
+locale: "en"
+draft: false
+---
+
+
+Tunnel mode is designed for home servers that sit behind **NAT** or **CGNAT**, where opening ports is impossible or undesirable. Cloudflare Tunnel creates an **outbound-only connection** from your machine to Cloudflare's edge, making your services accessible via your domain **without any port forwarding**.
+
+## When to Use Tunnel Mode
+
+- Your server is behind NAT or CGNAT (common with residential ISPs)
+- You cannot or do not want to open ports on your router
+- You want Cloudflare's DDoS protection and CDN in front of your services
+
+## Prerequisites
+
+- A free [Cloudflare account](https://dash.cloudflare.com/sign-up)
+- A domain name added to your Cloudflare account (Cloudflare must manage DNS)
+- Docker installed on your server
+
+## Setup
+
+### 1. Create a Tunnel
+
+1. Log in to the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/)
+2. Navigate to **Networks** > **Tunnels**
+3. Click **Create a tunnel**
+4. Choose **Cloudflared** as the connector type
+5. Give the tunnel a name (e.g., `mediabox`)
+6. Copy the **tunnel token** -- you will need it in the next step
+
+### 2. Run the Installer
+
+```bash
+npx create-mediabox
+```
+
+Select **Cloudflare Tunnel** as the deployment mode. You will be prompted for:
+
+- **Domain** -- your Cloudflare-managed domain (e.g., `example.com`)
+- **Tunnel token** -- the token you copied from the Zero Trust dashboard
+
+The installer sets the `CLOUDFLARE_TUNNEL_TOKEN` environment variable and adds a `cloudflared` container to the Docker Compose stack.
+
+Start the stack:
+
+```bash
+docker compose up -d
+```
+
+### 3. Configure Public Hostnames
+
+Back in the Zero Trust dashboard, add a public hostname for each service under your tunnel:
+
+| Public Hostname | Service | URL |
+| --- | --- | --- |
+| `example.com` | HTTP | `mcp-server:3000` |
+| `jellyfin.example.com` | HTTP | `jellyfin:8096` |
+| `sonarr.example.com` | HTTP | `sonarr:8989` |
+| `radarr.example.com` | HTTP | `radarr:7878` |
+| `prowlarr.example.com` | HTTP | `prowlarr:9696` |
+| `qbit.example.com` | HTTP | `qbittorrent:8085` |
+| `pyload.example.com` | HTTP | `pyload:8000` |
+
+The **MCP server goes on the root domain** (not a subdomain). Each hostname maps to the **internal Docker container name and port**. The port (e.g., `8096` for Jellyfin) must match the container's internal port -- not the host-mapped port. Cloudflare handles TLS termination at the edge.
+
+> The subdomain names here are just suggestions -- since you configure them manually in the Zero Trust dashboard, you can choose any names you prefer. Just be consistent with what you use in your AI client's MCP configuration.
+
+## How It Works
+
+```
+Your Server                          Cloudflare Edge
+┌──────────────────────┐             ┌──────────────────┐
+│  cloudflared         │──outbound──▶│  Cloudflare      │◀── Users
+│  (tunnel connector)  │  connection │  (TLS + CDN)     │
+│         │            │             └──────────────────┘
+│         ▼            │
+│  jellyfin, sonarr,   │
+│  radarr, mcp, etc.   │
+└──────────────────────┘
+```
+
+- The `cloudflared` container initiates an **outbound** connection to Cloudflare -- no inbound ports are opened
+- Cloudflare routes incoming HTTPS requests through the tunnel to the correct internal service
+- TLS is terminated at Cloudflare's edge; internal traffic stays within the Docker network
+
+## Environment Variables
+
+| Variable | Description |
+| --- | --- |
+| `CLOUDFLARE_TUNNEL_TOKEN` | The tunnel token from the Zero Trust dashboard. Set in your `.env` file. |
+
+## Verifying the Deployment
+
+After configuring public hostnames, test access:
+
+```bash
+curl -I https://jellyfin.example.com
+curl -I https://mcp.example.com
+```
+
+If the tunnel is connected, you should receive valid HTTPS responses.
+
+To check the tunnel status:
+
+```bash
+docker logs cloudflared
+```
+
+Look for log lines indicating a successful connection to Cloudflare's edge.
+
+## Troubleshooting
+
+- **Tunnel not connecting** -- Verify the `CLOUDFLARE_TUNNEL_TOKEN` is correct in your `.env` file and that the `cloudflared` container can reach the internet.
+- **502 errors** -- The target service is not running or the hostname mapping in Zero Trust is wrong. Check that the service name and port match the Docker Compose service definitions.
+- **DNS not resolving** -- Ensure your domain's DNS is managed by Cloudflare and that the public hostnames are configured under the correct tunnel.

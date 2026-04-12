@@ -1,0 +1,40 @@
+---
+import LandingLayout from '../layouts/LandingLayout.astro';
+import Hero from '../components/landing/Hero.astro';
+import Features from '../components/landing/Features.astro';
+import Architecture from '../components/landing/Architecture.astro';
+import ToolCategories from '../components/landing/ToolCategories.astro';
+import DeploymentModes from '../components/landing/DeploymentModes.astro';
+import QuickStart from '../components/landing/QuickStart.astro';
+import Stats from '../components/landing/Stats.astro';
+import CTA from '../components/landing/CTA.astro';
+---
+
+<LandingLayout
+  title="Mediabox MCP — AI-Powered Media Server Management"
+  description="Control your entire media library with natural language. One command to deploy Jellyfin, Sonarr, Radarr, and 7 more services — fully managed by AI through 25 MCP tools."
+  locale="en"
+>
+  <Hero locale="en" />
+  <Features locale="en" />
+  <Architecture locale="en" />
+  <ToolCategories locale="en" />
+  <DeploymentModes locale="en" />
+  <QuickStart locale="en" />
+  <Stats locale="en" />
+  <CTA locale="en" />
+</LandingLayout>
+
+<script is:inline>
+(function() {
+  // Only redirect once per session — don't loop or override manual language switch
+  if (sessionStorage.getItem('lang-redirected')) return;
+  sessionStorage.setItem('lang-redirected', '1');
+
+  // Check if the browser language is Spanish
+  var lang = navigator.language || navigator.userLanguage || '';
+  if (lang.toLowerCase().startsWith('es')) {
+    window.location.replace('/es');
+  }
+})();
+</script>

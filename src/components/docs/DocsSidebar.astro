@@ -1,0 +1,78 @@
+---
+import { getNavForLocale } from '../../data/navigation';
+
+interface Props {
+  locale: string;
+  currentPath: string;
+  mobile?: boolean;
+}
+
+const { locale, currentPath, mobile = false } = Astro.props;
+const nav = getNavForLocale(locale);
+---
+
+{mobile ? (
+  <!-- Mobile sidebar content (rendered inside drawer) -->
+  <nav class="px-4 py-4 space-y-5">
+    {nav.map((section) => (
+      <div>
+        <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 px-2">
+          {section.title}
+        </h4>
+        <ul class="space-y-0.5">
+          {section.items.map((item) => {
+            const isActive = currentPath === item.href;
+            return (
+              <li>
+                <a
+                  href={item.href}
+                  class:list={[
+                    'block px-3 py-2 rounded-lg text-sm transition-colors',
+                    isActive
+                      ? 'text-accent-hover bg-accent/10 font-medium'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-white/5',
+                  ]}
+                >
+                  {item.title}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </nav>
+) : (
+  <!-- Desktop sidebar -->
+  <aside class="w-64 shrink-0 hidden lg:block">
+    <nav class="sticky top-[96px] max-h-[calc(100vh-96px)] overflow-y-auto pb-8 pr-4 space-y-6">
+      {nav.map((section) => (
+        <div>
+          <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 px-3">
+            {section.title}
+          </h4>
+          <ul class="space-y-0.5">
+            {section.items.map((item) => {
+              const isActive = currentPath === item.href;
+              return (
+                <li>
+                  <a
+                    href={item.href}
+                    class:list={[
+                      'block px-3 py-1.5 rounded-lg text-sm transition-colors',
+                      isActive
+                        ? 'text-accent-hover bg-accent/10 font-medium'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-white/5',
+                    ]}
+                  >
+                    {item.title}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  </aside>
+)}

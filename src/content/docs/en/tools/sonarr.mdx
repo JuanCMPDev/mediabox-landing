@@ -1,0 +1,140 @@
+---
+title: "Sonarr Tools"
+description: "Tools for searching, monitoring, and downloading TV series through Sonarr."
+category: "tools"
+order: 4
+locale: "en"
+draft: false
+---
+
+
+These five tools manage TV series through Sonarr -- search for new shows, monitor their status, browse available releases, and trigger downloads.
+
+---
+
+## series_search
+
+Search for a TV series and optionally add it to Sonarr for monitoring. Use `searchNow=false` (the default) to add without auto-downloading, letting you pick a release manually via `series_releases` + `series_grab`.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `query` | string | No | Series name to search. Required for search, optional when adding by ID. |
+| `addTvdbId` | number | No | TVDB ID to add (from search results). Omit to just search. |
+| `rootFolder` | string | No | Root folder path. One of `"/tv"`, `"/anime"`. Defaults to `"/tv"`. |
+| `monitor` | string | No | Monitor strategy. One of `"all"`, `"future"`, `"missing"`, `"none"`, `"firstSeason"`, `"lastSeason"`. Defaults to `"all"`. |
+| `seasons` | number[] | No | Specific season numbers to monitor. |
+| `quality` | string | No | Quality profile name. One of `"Any"`, `"SD"`, `"HD-720p"`, `"HD-1080p"`, `"Ultra-HD"`, `"HD - 720p/1080p"`. Defaults to `"HD-1080p"`. |
+| `searchNow` | boolean | No | Trigger automatic download search after adding. Defaults to `false`. |
+
+### Usage Example
+
+> "Search Sonarr for 'Severance'."
+
+> "Add TVDB 403245 to Sonarr as anime with HD-1080p quality."
+
+> "Add The Bear and monitor only season 3, don't search yet."
+
+---
+
+## series_status
+
+View monitored series, calendar, missing episodes, queue, download history, or list episodes of a specific series/season.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `view` | string | No | The view to display. One of `"series"`, `"episodes"`, `"calendar"`, `"missing"`, `"queue"`, `"history"`. Defaults to `"series"`. |
+| `seriesId` | number | No | Sonarr series ID (or tvdbId -- auto-resolved). Required for the `"episodes"` view. |
+| `seasonNumber` | number | No | Filter episodes by season number (for the `"episodes"` view). |
+| `page` | number | No | Page number (1-based, for episodes/series views). Defaults to `1`. |
+| `pageSize` | number | No | Items per page (for episodes/series views). Defaults to `50`. |
+| `limit` | number | No | Maximum number of items to return (for missing/history views). Defaults to `20`. |
+
+### Views
+
+- **series** -- List all series currently being monitored by Sonarr (paginated).
+- **episodes** -- List all episodes for a given `seriesId`, optionally filtered by `seasonNumber`.
+- **calendar** -- Show upcoming episode air dates (next 14 days).
+- **missing** -- List episodes that are monitored but not yet downloaded.
+- **queue** -- Show the current download queue for TV episodes.
+- **history** -- View recent download and import history.
+
+### Usage Example
+
+> "What series am I monitoring in Sonarr?"
+
+> "List episodes for series 5, season 2."
+
+> "Are there any episodes airing this week?"
+
+> "Show me missing episodes."
+
+---
+
+## series_remove
+
+Remove a series from Sonarr. Optionally delete the associated files from disk.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `seriesId` | number | Yes | The Sonarr series ID to remove. |
+| `deleteFiles` | boolean | No | When `true`, also delete the series files from disk. Defaults to `false`. |
+
+### Usage Example
+
+> "Remove series 42 from Sonarr."
+
+> "Remove The Flash from Sonarr and delete its files."
+
+---
+
+## series_releases
+
+Search available torrent releases for an episode or season. You can pass `seriesId` + `seasonNumber` + `episodeNumber` to look up a specific episode (the tool resolves the internal episodeId automatically). `seriesId` can be a Sonarr ID or tvdbId -- both are auto-resolved.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `episodeId` | number | No | Sonarr internal episode ID (if you already have it). |
+| `seriesId` | number | No | Sonarr series ID or tvdbId (auto-resolved). Use with `seasonNumber` for a full season, or add `episodeNumber` for a specific episode. |
+| `seasonNumber` | number | No | Season number to search releases for. |
+| `episodeNumber` | number | No | Episode number within the season (e.g. `6` for S04E06). Requires `seriesId` and `seasonNumber`. |
+
+At least one of these combinations is required: `episodeId` alone, `seriesId` + `seasonNumber`, or `seriesId` + `seasonNumber` + `episodeNumber`.
+
+### Usage Example
+
+> "Search for releases for episode 1504."
+
+> "Find available downloads for Severance season 2."
+
+> "Show releases for series 5, season 4, episode 6."
+
+---
+
+## series_grab
+
+Download a specific torrent release for a series episode. Automatically cancels any existing download for the same episode to avoid duplicates. `seriesId` can be a Sonarr ID or tvdbId -- both are auto-resolved.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `guid` | string | Yes | The release GUID to download (from `series_releases` results). |
+| `indexerId` | number | Yes | The indexer ID for the release (from `series_releases` results). |
+| `episodeId` | number | No | Sonarr internal episode ID. If provided, cancels any active download for this episode before grabbing. |
+| `seriesId` | number | No | Sonarr series ID or tvdbId (used with `seasonNumber` + `episodeNumber` to resolve episodeId). |
+| `seasonNumber` | number | No | Season number (used with `seriesId` and `episodeNumber`). |
+| `episodeNumber` | number | No | Episode number within the season. |
+
+### Usage Example
+
+> "Grab the release with GUID abc123def456 from indexer 2."
+
+> "Download that second release from the list for series 5, S04E06."

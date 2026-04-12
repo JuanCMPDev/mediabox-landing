@@ -1,0 +1,37 @@
+---
+import { useTranslations, type Locale } from '../../i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const locale = (Astro.props.locale ?? 'en') as Locale;
+const t = useTranslations(locale);
+
+const stats = [
+  { value: '25', label: t.stats.tools, color: '#8b5cf6' },
+  { value: '7+', label: t.stats.services, color: '#06b6d4' },
+  { value: '3', label: t.stats.deployModes, color: '#4caf50' },
+  { value: '1', label: t.stats.command, color: '#ffc230' },
+];
+---
+
+<section class="relative py-16 sm:py-20">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        {stats.map((stat) => (
+          <div class="text-center">
+            <div
+              class="text-3xl sm:text-4xl md:text-5xl font-bold mb-1 sm:mb-2"
+              style={`color: ${stat.color}`}
+            >
+              {stat.value}
+            </div>
+            <div class="text-xs sm:text-sm text-text-secondary">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

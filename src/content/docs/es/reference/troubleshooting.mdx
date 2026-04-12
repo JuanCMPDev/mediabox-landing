@@ -1,0 +1,185 @@
+---
+title: "Solucion de Problemas"
+description: "Problemas comunes y soluciones al ejecutar Mediabox MCP -- contenedores, red, permisos y mas."
+category: "reference"
+order: 2
+locale: "es"
+draft: false
+---
+
+Esta pagina cubre los problemas comunes que puedes encontrar al ejecutar Mediabox MCP y como resolverlos.
+
+## Los Contenedores No Inician
+
+**Sintoma:** Uno o mas contenedores no inician o se reinician continuamente.
+
+**Diagnostico:**
+
+```bash
+docker compose ps
+docker compose logs <nombre-del-servicio>
+```
+
+**Causas comunes:**
+
+- **Docker no esta corriendo** -- asegurate de que el demonio de Docker este activo: `docker info`
+- **Puerto ya en uso** -- otro proceso esta usando el mismo puerto. Verifica con:
+  ```bash
+  # Linux/macOS
+  lsof -i :8096
+  # Windows
+  netstat -ano | findstr :8096
+  ```
+  Detiene el proceso en conflicto o cambia el puerto en `docker-compose.yml`.
+- **Memoria insuficiente** -- el stack completo necesita al menos 2 GB de RAM (4 GB recomendados). Verifica con `docker stats`.
+- **Fallo al descargar imagen** -- si estas detras de un proxy o tienes internet limitado, Docker puede fallar al descargar imagenes. Ejecuta `docker compose pull` para reintentar.
+
+## Errores de API Key
+
+**Sintoma:** El servidor MCP no puede comunicarse con Jellyfin, Sonarr o Radarr. Los logs muestran "unauthorized" o respuestas vacias.
+
+**Solucion:**
+
+Las API keys son auto-generadas por cada servicio en su primer arranque y extraidas por el asistente al archivo `.env`. Si estan desincronizadas:
+
+1. Extrae las API keys actuales de las configuraciones de los servicios:
+   ```bash
+   grep -oP '<ApiKey>\K[^<]+' config/sonarr/config.xml
+   grep -oP '<ApiKey>\K[^<]+' config/radarr/config.xml
+   ```
+2. Actualiza el archivo `.env` con las claves correctas
+3. Recrea el servidor MCP para que tome el nuevo entorno:
+   ```bash
+   docker compose up -d --force-recreate mcp-server
+   ```
+
+## Conflictos de Puertos
+
+**Sintoma:** `Bind for 0.0.0.0:PORT failed: port is already allocated`
+
+**Solucion:**
+
+Otro proceso o contenedor esta usando el mismo puerto. Detiene el servicio en conflicto o edita `docker-compose.yml` para remapear el puerto:
+
+```yaml
+ports:
+  - "9096:8096"  # Mapea a un puerto de host diferente
+```
+
+Luego recrea:
+
+```bash
+docker compose up -d
+```
+
+## Espacio en Disco
+
+**Sintoma:** Las descargas fallan, Jellyfin no puede escanear las bibliotecas, o los contenedores se caen inesperadamente.
+
+**Diagnostico:**
+
+```bash
+# Verificar espacio en disco del host
+df -h .
+
+# Verificar uso de disco de Docker
+docker system df
+```
+
+**Solucion:**
+
+- Elimina las descargas completadas del directorio `./downloads/` que ya hayan sido importadas
+- Usa la herramienta MCP `cleanup_server` para limpiar caches y torrents huerfanos
+- Limpia recursos de Docker: `docker system prune`
+- Agrega mas espacio en disco o mueve el directorio de medios a un disco mas grande
+
+## Permisos de Archivos
+
+**Sintoma:** Los servicios no pueden leer o escribir en el directorio de medios. Los logs muestran errores de "permission denied".
+
+**Solucion:**
+
+Los valores `PUID` y `PGID` se configuran en el `docker-compose.yml` (auto-detectados durante la configuracion del asistente, tipicamente `1000:1000`). Asegurate de que los directorios del host coincidan:
+
+```bash
+# Verificar propiedad actual
+ls -la ./media/ ./downloads/
+
+# Corregir permisos (ajusta UID/GID para que coincidan con los valores de docker-compose.yml)
+sudo chown -R 1000:1000 ./media/ ./downloads/ ./config/
+sudo chmod -R 755 ./media/ ./downloads/
+```
+
+## Cloudflare Tunnel No Conecta
+
+**Sintoma:** El contenedor `cloudflared` esta corriendo pero los servicios no son accesibles a traves de sus subdominios.
+
+**Diagnostico:**
+
+```bash
+docker logs cloudflared
+```
+
+**Causas comunes:**
+
+- **Token de tunnel invalido** -- verifica que `CLOUDFLARE_TUNNEL_TOKEN` en tu archivo `.env` coincida con el token del panel de Zero Trust
+- **Tunnel eliminado** -- si el tunnel fue eliminado en el panel de Zero Trust, crea uno nuevo y actualiza el token
+- **DNS no gestionado por Cloudflare** -- el dominio debe usar los nameservers de Cloudflare
+- **Hostnames publicos no configurados** -- verifica que cada servicio tenga una entrada de hostname publico en el panel de Zero Trust bajo tu tunnel
+
+## Fallos de Indexers en Prowlarr
+
+**Sintoma:** Prowlarr muestra indexers como fallidos o no devuelve resultados de busqueda.
+
+**Diagnostico:**
+
+```bash
+docker logs prowlarr
+```
+
+**Causas comunes:**
+
+- **No hay indexers agregados** -- Prowlarr inicia sin indexers. Debes agregarlos manualmente despues de la configuracion (consulta [Inicio Rapido](/docs/getting-started/quick-start#required-post-setup-add-indexers-in-prowlarr))
+- **FlareSolverr no etiquetado** -- los indexers que requieren bypass de Cloudflare necesitan la etiqueta `flaresolverr`. Crea la etiqueta y asignala tanto al proxy FlareSolverr como a los indexers relevantes
+- **Indexer caido** -- algunos indexers tienen disponibilidad intermitente. Prueba manualmente en la interfaz de Prowlarr
+- **Rate limiting** -- puedes estar alcanzando el limite de solicitudes del indexer. Espera e intenta de nuevo
+- **Credenciales invalidas** -- si el indexer requiere un login, verifica tus credenciales en la configuracion del indexer
+
+## El Servidor MCP No Responde
+
+**Sintoma:** Claude Desktop u otros clientes no pueden conectarse al endpoint MCP.
+
+**Diagnostico:**
+
+```bash
+docker logs mcp-server
+curl http://localhost:3000/health
+```
+
+**Causas comunes:**
+
+- **Contenedor no esta corriendo** -- verifica con `docker compose ps`. Busca el contenedor `mcp-server`
+- **URL incorrecta** -- asegurate de que el cliente este configurado con la URL correcta incluyendo la ruta `/mcp` (por ejemplo, `http://localhost:3000/mcp`)
+- **API keys faltantes** -- si `JELLYFIN_API_KEY`, `SONARR_API_KEY` o `RADARR_API_KEY` estan vacias en `.env`, el servidor inicia pero las herramientas fallaran. Extrae y configura las claves
+- **Token OAuth2 expirado** -- los tokens de acceso expiran despues de 24 horas. Los clientes MCP deberian gestionar el refresco automaticamente, pero reiniciar el servidor MCP borra todos los tokens (almacen en memoria), lo que requiere re-autenticacion
+- **Firewall bloqueando** -- en despliegues VPS, asegurate de que el puerto 443 (Caddy) o 3000 (local) este abierto
+
+## El Bot de Telegram No Funciona
+
+**Sintoma:** El bot de Telegram no responde a los mensajes.
+
+**Causas comunes:**
+
+- **Contenedor no esta en el stack** -- el bot solo se agrega a `docker-compose.yml` si se habilita durante el asistente. Verifica con `docker compose ps` que exista `telegram-bot`
+- **Token del bot invalido** -- verifica `TELEGRAM_BOT_TOKEN` en `.env`. Prueba con: `curl https://api.telegram.org/bot<TOKEN>/getMe`
+- **Usuario no permitido** -- si `ALLOWED_TELEGRAM_USERS` esta configurado, tu ID de usuario de Telegram debe estar en la lista
+- **API key del LLM invalida** -- verifica `OPENROUTER_API_KEY` o `GOOGLE_AI_API_KEY` en `.env`
+- **Servidor MCP inaccesible** -- el bot se conecta a `http://mcp-server:3000/mcp` internamente. Asegurate de que el servidor MCP este corriendo
+
+## Obtener Mas Ayuda
+
+Si tu problema no esta listado aqui:
+
+1. Revisa los logs completos de los contenedores: `docker compose logs`
+2. Busca en los [Issues de GitHub](https://github.com/JuanCMPDev/mediabox-mcp/issues) problemas similares
+3. Abre un nuevo issue con tus logs y detalles del entorno

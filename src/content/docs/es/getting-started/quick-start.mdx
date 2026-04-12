@@ -1,0 +1,147 @@
+---
+title: "Inicio Rapido"
+description: "Pon Mediabox MCP en funcionamiento en minutos con el asistente de configuracion interactivo."
+category: "getting-started"
+order: 3
+locale: "es"
+draft: false
+---
+
+La forma mas rapida de poner **Mediabox MCP** en funcionamiento es con el asistente de configuracion interactivo. Un solo comando se encarga de todo -- desde generar los archivos de configuracion hasta iniciar el stack de **Docker**.
+
+## Ejecutar el Asistente de Configuracion
+
+```bash
+npx create-mediabox
+```
+
+Esto lanza un asistente interactivo que te guia a traves de todo el proceso de configuracion.
+
+## Pasos del Asistente
+
+### 1. Modo de Despliegue
+
+Elige como deseas desplegar:
+
+| Modo | Descripcion |
+|---|---|
+| **Local** | Los servicios se ejecutan en `localhost` con acceso directo por puertos. Ideal para uso en red domestica. |
+| **VPS / Cloud server** | Proxy inverso Caddy con HTTPS automatico via Let's Encrypt. Cada servicio obtiene su propio subdominio. |
+| **Local + Acceso publico (Cloudflare Tunnel)** | Tunnel saliente a traves de la red de Cloudflare. Sin necesidad de abrir puertos. |
+
+### 2. Dominio y Red (solo modos VPS y Tunnel)
+
+- **Dominio base** -- Tu dominio para los servicios (por ejemplo, `media.ejemplo.com`)
+- **Email de Let's Encrypt** -- Para certificados HTTPS automaticos (solo modo VPS)
+- **Token de Cloudflare Tunnel** -- Desde el dashboard de Zero Trust (solo modo Tunnel)
+
+### 3. Zona Horaria
+
+El asistente detecta automaticamente tu zona horaria y te permite buscar/filtrar de la lista completa IANA. Se usa para tareas programadas y metadatos multimedia.
+
+### 4. Rutas de Almacenamiento
+
+Configura donde se almacenaran tus archivos multimedia:
+
+- **Ruta de Peliculas** (por defecto: `./media/movies`)
+- **Ruta de Series** (por defecto: `./media/tv`)
+- **Ruta de Anime** (por defecto: `./media/anime`)
+- **Ruta de Musica** (por defecto: `./media/music`)
+
+### 5. Credenciales de Servicios
+
+Se te pedira:
+
+- **Contrasena de qBittorrent** -- Minimo 8 caracteres, usada para el cliente de torrents
+- **Usuario admin de Jellyfin** -- Por defecto es `admin`
+- **Contrasena admin de Jellyfin** -- Minimo 4 caracteres, para la cuenta de administrador del media server
+
+### 6. Configuracion del Servidor MCP
+
+- **URL publica del MCP** -- Se genera automaticamente segun tu dominio (o `http://localhost:3000` en modo local)
+- **Secreto de autenticacion MCP** -- Clave hex de 32 caracteres auto-generada para OAuth2
+- **API key interna** -- Clave auto-generada para comunicacion entre servicios
+
+> Ambos secretos se generan automaticamente. Puedes aceptar los valores por defecto a menos que tengas una razon especifica para cambiarlos.
+
+### 7. Integraciones Opcionales
+
+**Bot de Telegram** -- Si lo habilitas, se te pedira:
+
+- **Token del Bot de Telegram** -- Obtenlo de [@BotFather](https://t.me/BotFather)
+- **Proveedor LLM** -- Elige entre **OpenRouter** (recomendado) o **Google Gemini**
+- **API key del LLM** -- Tu API key del proveedor elegido (por ejemplo, de [openrouter.ai](https://openrouter.ai) o [Google AI Studio](https://aistudio.google.com))
+- **Modelo de OpenRouter** -- Por defecto es `openai/gpt-4o` (solo OpenRouter)
+- **IDs de usuarios de Telegram permitidos** -- Lista separada por comas para restringir acceso (dejar vacio para permitir todos)
+
+**Bazarr** -- Descargador automatico de subtitulos. Si lo habilitas, agrega un contenedor de Bazarr al stack.
+
+## Que Sucede Despues de la Configuracion
+
+Una vez que completes el asistente:
+
+1. **Se generan los archivos de configuracion** -- `.env`, `docker-compose.yml` y las configuraciones de servicios se crean en el directorio de tu proyecto
+2. **Los contenedores Docker se inician** -- Todos los servicios se descargan y lanzan automaticamente
+3. **Los servicios se auto-configuran** -- Se crea el usuario admin de Jellyfin, Sonarr/Radarr reciben carpetas raiz y cliente de descargas configurados, Prowlarr se sincroniza con Sonarr/Radarr, y FlareSolverr se registra como proxy de indexadores
+4. **El servidor MCP se inicia** -- El servidor de herramientas de IA esta listo para aceptar conexiones
+
+El asistente muestra las URLs de cada servicio una vez que todo esta en funcionamiento.
+
+## Post-Setup Obligatorio: Agregar Indexadores en Prowlarr
+
+Despues de que el asistente termine, **debes agregar indexadores manualmente** (trackers de torrents) en Prowlarr. Sin indexadores, Sonarr y Radarr no pueden buscar ni descargar contenido.
+
+### 1. Abrir Prowlarr
+
+Ve a `http://localhost:9696` (o `https://prowlarr.tu-dominio.com` si usas modo VPS/Tunnel). Inicia sesion con las credenciales de admin de Jellyfin que configuraste en el asistente.
+
+### 2. Agregar Indexadores
+
+1. Navega a **Indexers** > **Add Indexer**
+2. Busca tus trackers de torrents preferidos (por ejemplo, 1337x, RARBG, Nyaa para anime, etc.)
+3. Configura cada indexador con las credenciales o ajustes necesarios
+4. **Guarda** cada indexador
+
+### 3. Activar FlareSolverr en Indexadores que lo Necesiten
+
+Algunos indexadores usan proteccion de Cloudflare. Para esos:
+
+1. Ve a **Indexers** > **Tags** y crea un tag llamado `flaresolverr`
+2. Ve a **Settings** > **Indexer Proxies** > edita el proxy **FlareSolverr** (ya configurado por el asistente)
+3. Agrega el tag `flaresolverr` al proxy
+4. Al agregar indexadores que requieran bypass de Cloudflare, asignales el mismo tag `flaresolverr`
+
+Esto le indica a Prowlarr que enrute esos indexadores especificos a traves de FlareSolverr.
+
+### 4. Verificar Sincronizacion
+
+Una vez agregados los indexadores, Prowlarr los sincroniza automaticamente con Sonarr y Radarr (esto fue configurado por el asistente). Puedes verificarlo en **Settings** > **Apps** en Prowlarr.
+
+## Conectar tu Cliente de IA
+
+Agrega el servidor MCP a la configuracion de tu cliente:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "https://tu-dominio.com/mcp"
+    }
+  }
+}
+```
+
+Reemplaza la URL con tu `MCP_PUBLIC_URL` del archivo `.env`. Para modo local, usa `http://localhost:3000/mcp`. La autenticacion OAuth2 se maneja automaticamente.
+
+## Verificar la Configuracion
+
+Despues de conectar tu cliente de IA y agregar indexadores, prueba con un comando simple:
+
+> "Busca la pelicula Tears of Steel"
+
+Si funciona correctamente, la IA usara la herramienta `movie_search` y devolvera resultados de tus indexadores configurados.
+
+## Siguientes Pasos
+
+- [Variables de Entorno](/es/docs/configuration/environment-variables) -- Ajusta tu configuracion en detalle
+- [Configuracion Manual](/es/docs/getting-started/manual-setup) -- Configura sin el asistente

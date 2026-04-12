@@ -1,0 +1,136 @@
+---
+title: "Docker Compose"
+description: "Desglose completo de los servicios, puertos, volumenes y configuracion de red del stack de Mediabox MCP."
+category: "configuration"
+order: 2
+locale: "es"
+draft: false
+---
+
+Mediabox MCP se ejecuta como un stack multi-contenedor con Docker Compose. Esta pagina explica cada servicio, su configuracion y como personalizar el stack.
+
+## Resumen de Servicios
+
+| Servicio | Imagen | Puerto Host | Descripcion |
+|---|---|---|---|
+| **Jellyfin** | `lscr.io/linuxserver/jellyfin` | 8096 | Servidor de streaming multimedia |
+| **MCP Server** | Compilado desde `./mcp-server` | 3000 | Servidor de herramientas de IA (25 herramientas MCP) |
+| **Sonarr** | `lscr.io/linuxserver/sonarr` | 8989 | Gestion de series de TV |
+| **Radarr** | `lscr.io/linuxserver/radarr` | 7878 | Gestion de peliculas |
+| **qBittorrent** | `lscr.io/linuxserver/qbittorrent` | 8085 | Cliente BitTorrent |
+| **PyLoad** | `lscr.io/linuxserver/pyload-ng` | 8001 | Gestor de descargas directas |
+| **Prowlarr** | `lscr.io/linuxserver/prowlarr` | 9696 | Administrador de indexadores |
+| **FlareSolverr** | `ghcr.io/flaresolverr/flaresolverr` | 8191 | Proxy para evadir proteccion Cloudflare |
+
+### Servicios Opcionales
+
+| Servicio | Imagen | Puerto | Descripcion |
+|---|---|---|---|
+| **Bot de Telegram** | Compilado desde `./mcp-telegram-client` | -- | Interfaz de Telegram para gestionar contenido multimedia por chat. Se habilita durante la configuracion del asistente. |
+| **Bazarr** | `lscr.io/linuxserver/bazarr` | 6767 | Descargador automatico de subtitulos. Se habilita durante la configuracion del asistente. |
+
+> Caddy (proxy inverso) y Cloudflared (cliente de tunnel) son agregados por el asistente al seleccionar los modos de despliegue VPS o Tunnel respectivamente. No estan presentes en el `docker-compose.yml` base.
+
+## Puertos
+
+En modo **local**, los servicios son accesibles directamente en sus puertos host:
+
+```
+http://localhost:8096   # Jellyfin
+http://localhost:3000   # MCP Server
+http://localhost:8989   # Sonarr
+http://localhost:7878   # Radarr
+http://localhost:8085   # qBittorrent
+http://localhost:8001   # PyLoad
+http://localhost:9696   # Prowlarr
+http://localhost:8191   # FlareSolverr
+```
+
+En modo **VPS**, todos los puertos se enlazan a `127.0.0.1` y se acceden a traves de subdominios de Caddy (por ejemplo, `jellyfin.tudominio.com`).
+
+## Volumenes
+
+### Volumenes de Configuracion
+
+Cada servicio almacena su configuracion en un subdirectorio de `./config/`:
+
+| Ruta del Volumen | Proposito |
+|---|---|
+| `./config/jellyfin` | Configuracion, metadatos y base de datos de Jellyfin |
+| `./config/sonarr` | Configuracion y base de datos de Sonarr |
+| `./config/radarr` | Configuracion y base de datos de Radarr |
+| `./config/qbittorrent` | Configuracion de qBittorrent |
+| `./config/prowlarr` | Configuracion y base de datos de Prowlarr |
+| `./config/pyload` | Configuracion de PyLoad |
+
+### Volumenes de Contenido Multimedia
+
+Los archivos multimedia se almacenan en `./media/` y se comparten entre Jellyfin, Sonarr, Radarr y el servidor MCP:
+
+```
+media/
+  movies/    # Peliculas (gestionadas por Radarr)
+  tv/        # Series de TV (gestionadas por Sonarr)
+  anime/     # Anime
+  music/     # Musica
+```
+
+El directorio `./downloads/` es utilizado por qBittorrent y PyLoad para descargas activas antes de ser importadas.
+
+## Configuracion de Red
+
+Todos los servicios se comunican a traves de una red Docker bridge compartida llamada `mediabox-net`. Los servicios se referencian entre si por nombre de contenedor (por ejemplo, Sonarr se conecta a qBittorrent en `http://qbittorrent:8085`).
+
+```yaml
+networks:
+  mediabox-net:
+    driver: bridge
+```
+
+Puertos internos usados para la comunicacion entre servicios:
+
+| Servicio | URL Interna |
+|---|---|
+| Jellyfin | `http://jellyfin:8096` |
+| MCP Server | `http://mcp-server:3000` |
+| Sonarr | `http://sonarr:8989` |
+| Radarr | `http://radarr:7878` |
+| qBittorrent | `http://qbittorrent:8085` |
+| PyLoad | `http://pyload:8000` |
+| Prowlarr | `http://prowlarr:9696` |
+| FlareSolverr | `http://flaresolverr:8191` |
+
+## Consejos de Personalizacion
+
+### Cambiar Puertos
+
+Para cambiar el puerto host de un servicio, modifica el mapeo de `ports` en `docker-compose.yml`:
+
+```yaml
+services:
+  jellyfin:
+    ports:
+      - "9096:8096"  # Cambiado de 8096 a 9096 en el host
+```
+
+### Transcodificacion por GPU (Jellyfin)
+
+Para habilitar la transcodificacion acelerada por hardware en Jellyfin, pasa tu GPU al contenedor:
+
+```yaml
+services:
+  jellyfin:
+    devices:
+      - /dev/dri:/dev/dri  # GPU Intel/AMD
+    # Para NVIDIA, usa el NVIDIA Container Toolkit en su lugar
+```
+
+### Reiniciar Despues de Cambios
+
+Despues de modificar `docker-compose.yml`, aplica los cambios:
+
+```bash
+docker compose up -d
+```
+
+Docker Compose solo recreara los contenedores cuya configuracion haya cambiado.

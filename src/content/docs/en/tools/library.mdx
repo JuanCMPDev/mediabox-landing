@@ -1,0 +1,100 @@
+---
+title: "Library Tools"
+description: "Tools for managing Jellyfin libraries, files, episode naming, and subtitle conversion."
+category: "tools"
+order: 3
+locale: "en"
+draft: false
+---
+
+
+These four tools handle library management, file operations, batch episode renaming, and subtitle conversion within your media server.
+
+---
+
+## manage_library
+
+Create a library, trigger a scan, or refresh metadata for an item.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `action` | string | Yes | Action to perform. One of: `scan`, `create`, `refresh_metadata`. |
+| `name` | string | Conditional | Library name. Required when `action` is `create`. |
+| `type` | string | Conditional | Library type. Required when `action` is `create`. One of: `movies`, `tvshows`, `music`, `mixed`. |
+| `folder` | string | Conditional | Folder path (e.g. `'/data/anime'`). Required when `action` is `create`. |
+| `itemId` | string | Conditional | Jellyfin item ID. Required when `action` is `refresh_metadata`. |
+
+### Usage Example
+
+> "Create a new mixed library called 'Anime' pointed at /data/anime."
+
+> "Scan the library for new content."
+
+> "Refresh metadata for item abc123."
+
+---
+
+## manage_files
+
+List, move, or delete files and folders. Paths starting with `downloads/` access the downloads folder. All other paths are relative to the media volume.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `action` | string | Yes | Action to perform. One of: `list`, `move`, `delete`. |
+| `path` | string | No | Path for listing or deleting (e.g. `'anime/Show'`, `'downloads/'`, `'movies/'`). |
+| `sourcePaths` | string[] | Conditional | Array of source paths for move (e.g. `['downloads/file.mkv', 'tv/Show1']`). Required when `action` is `move`. |
+| `destFolder` | string | Conditional | Destination folder for move (e.g. `'movies/Movie Name'`). Required when `action` is `move`. |
+| `jellyfinItemId` | string | No | Jellyfin item ID to delete. Also removes files from disk and cleans up Sonarr/Radarr entries. Used when `action` is `delete`. |
+
+### Usage Example
+
+> "List all files in the downloads folder."
+
+> "Move downloads/movie.mkv and downloads/subs.srt to movies/Movie (2024)."
+
+> "Delete the Jellyfin item with ID abc123."
+
+---
+
+## rename_episodes
+
+Rename episode files to Jellyfin standard format (`ShowName - S01E01.ext`). Searches the show folder recursively. You can pass `jellyfinItemId` instead of `showPath` -- the tool resolves the path from Jellyfin automatically.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `showName` | string | Yes | Correct show name for renamed files (e.g. `'Rurouni Kenshin'`). |
+| `showPath` | string | No | Path to show folder (e.g. `'anime/Samurai X'`). Optional if `jellyfinItemId` is provided. |
+| `jellyfinItemId` | string | No | Jellyfin item ID -- resolves the file path automatically. Optional if `showPath` is provided. |
+| `seasonNumber` | number | No | Season number to use in filenames. Defaults to `1`. |
+| `dryRun` | boolean | No | Preview changes without applying. Defaults to `true`. |
+
+### Usage Example
+
+> "Preview renaming episodes in anime/Samurai X to 'Rurouni Kenshin'."
+
+> "Rename all episodes of item abc123 to 'Breaking Bad' season 3, apply changes."
+
+---
+
+## fix_subtitles
+
+Convert ASS/SSA subtitles to SRT in MKV files to prevent transcoding. Works on a single file or an entire folder (searched recursively). Large batches (more than 3 files) run as a background job.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `mediaPath` | string | Yes | Path to a media file or folder (e.g. `'anime/Show'` or `'/data/anime/Show'`). |
+| `dryRun` | boolean | No | List files that would be processed without making changes. Defaults to `true`. |
+
+### Usage Example
+
+> "Do a dry run of subtitle conversion for anime/Show."
+
+> "Fix the subtitles in all MKV files under anime/Show, apply changes."

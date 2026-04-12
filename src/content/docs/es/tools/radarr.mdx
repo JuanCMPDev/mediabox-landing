@@ -1,0 +1,118 @@
+---
+title: "Herramientas de Radarr"
+description: "Herramientas para buscar, monitorear y descargar películas a través de Radarr."
+category: "tools"
+order: 5
+locale: "es"
+draft: false
+---
+
+
+Estas cinco herramientas gestionan películas a través de Radarr -- buscar películas, monitorear su estado, explorar releases disponibles y ejecutar descargas.
+
+---
+
+## movie_search
+
+Buscar una película y opcionalmente agregarla a Radarr para monitoreo. Usa `searchNow=false` (el valor por defecto) para agregar sin descargar automáticamente, permitiéndote elegir un release manualmente via `movie_releases` + `movie_grab`.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `query` | string | No | Nombre de la película a buscar. Requerido para búsqueda, opcional al agregar por ID. |
+| `addTmdbId` | number | No | ID de TMDB a agregar (de los resultados de búsqueda). Omitir para solo buscar. |
+| `quality` | string | No | Nombre del perfil de calidad. Uno de `"Any"`, `"SD"`, `"HD-720p"`, `"HD-1080p"`, `"Ultra-HD"`, `"HD - 720p/1080p"`. Por defecto `"HD-1080p"`. |
+| `searchNow` | boolean | No | Ejecutar búsqueda automática de descarga después de agregar. Por defecto `false`. |
+
+### Ejemplo de Uso
+
+> "Busca 'Oppenheimer' en Radarr."
+
+> "Agrega TMDB 872585 a Radarr con calidad Ultra-HD."
+
+> "Agrega Dune Part Two pero no busques descargas todavía."
+
+---
+
+## movie_status
+
+Ver el estado de tu biblioteca de películas en Radarr -- películas monitoreadas, la cola de descarga o historial de descargas.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `view` | string | No | La vista a mostrar. Uno de `"movies"`, `"queue"`, `"history"`. Por defecto `"movies"`. |
+| `limit` | number | No | Número máximo de elementos a devolver (para la vista history). Por defecto `20`. |
+
+### Vistas
+
+- **movies** -- Listar todas las películas actualmente monitoreadas por Radarr.
+- **queue** -- Mostrar la cola de descarga actual para películas.
+- **history** -- Ver historial reciente de descargas e importaciones.
+
+### Ejemplo de Uso
+
+> "¿Qué películas estoy monitoreando?"
+
+> "¿Qué hay en la cola de descarga de películas?"
+
+> "Muéstrame el historial reciente de descargas de películas."
+
+---
+
+## movie_remove
+
+Eliminar una película de Radarr. Opcionalmente eliminar los archivos asociados del disco.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `movieId` | number | Sí | El ID de película en Radarr a eliminar. |
+| `deleteFiles` | boolean | No | Cuando es `true`, también elimina los archivos de la película del disco. Por defecto `false`. |
+
+### Ejemplo de Uso
+
+> "Elimina la película 87 de Radarr."
+
+> "Elimina esa película vieja y borra sus archivos también."
+
+---
+
+## movie_releases
+
+Buscar releases de torrent disponibles para una película específica. Muestra tamaño, idiomas, seeders y puntuación de formato personalizado.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `movieId` | number | Sí | El ID de película en Radarr para buscar releases. |
+
+### Ejemplo de Uso
+
+> "Busca releases disponibles para la película 87."
+
+> "¿Qué descargas están disponibles para Oppenheimer?"
+
+---
+
+## movie_grab
+
+Descargar un release de torrent específico para una película. Cancela automáticamente cualquier descarga existente de la misma película para evitar duplicados.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `guid` | string | Sí | El GUID del release a descargar (de los resultados de `movie_releases`). |
+| `indexerId` | number | Sí | El ID del indexador para el release (de los resultados de `movie_releases`). |
+| `movieId` | number | No | ID de película en Radarr. Si se proporciona, cancela cualquier descarga activa de esta película antes de descargar. |
+
+### Ejemplo de Uso
+
+> "Descarga el release con GUID xyz789abc012 del indexador 3."
+
+> "Descarga el primer release de la lista para la película 87."

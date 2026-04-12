@@ -1,0 +1,37 @@
+---
+import { getPrevNext } from '../../data/navigation';
+
+interface Props {
+  locale: string;
+  currentPath: string;
+}
+
+const { locale, currentPath } = Astro.props;
+const { prev, next } = getPrevNext(currentPath, locale);
+---
+
+<nav class="mt-16 pt-8 border-t border-border-subtle flex justify-between gap-4">
+  {prev ? (
+    <a href={prev.href} class="group flex-1 glass-card rounded-xl p-4 hover:border-accent/30 transition-all">
+      <div class="text-xs text-text-muted mb-1">Previous</div>
+      <div class="text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+        {prev.title}
+      </div>
+    </a>
+  ) : <div />}
+
+  {next ? (
+    <a href={next.href} class="group flex-1 glass-card rounded-xl p-4 hover:border-accent/30 transition-all text-right">
+      <div class="text-xs text-text-muted mb-1">Next</div>
+      <div class="text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors flex items-center justify-end gap-2">
+        {next.title}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </div>
+    </a>
+  ) : <div />}
+</nav>

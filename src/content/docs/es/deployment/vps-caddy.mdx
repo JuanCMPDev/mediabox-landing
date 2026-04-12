@@ -1,0 +1,97 @@
+---
+title: "VPS con Caddy"
+description: "Despliega Mediabox MCP en un VPS con Caddy como reverse proxy y HTTPS automatico via Let's Encrypt."
+category: "deployment"
+order: 2
+locale: "es"
+draft: false
+---
+
+
+En el modo VPS, **Caddy** actua como reverse proxy delante de todos los servicios de Mediabox. Cada servicio obtiene su propio subdominio con certificados **HTTPS** automaticos de **Let's Encrypt**.
+
+## Cuando Usar el Modo VPS
+
+- Tienes un VPS o servidor dedicado con una IP publica
+- Posees un nombre de dominio y puedes gestionar sus registros DNS
+- Quieres acceso HTTPS seguro a todos los servicios desde cualquier lugar
+
+## Requisitos Previos
+
+- Un servidor con IP publica y Docker instalado
+- Un nombre de dominio (por ejemplo, `media.ejemplo.com`)
+- Acceso DNS para crear registros A
+- Una direccion de correo electronico para el registro de certificados Let's Encrypt
+
+## Configuracion DNS
+
+Crea registros A apuntando a la IP publica de tu servidor. El **servidor MCP se ejecuta en el dominio raiz**, y cada servicio obtiene un subdominio:
+
+| Tipo de Registro | Nombre | Valor |
+| --- | --- | --- |
+| A | `media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+| A | `jellyfin.media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+| A | `sonarr.media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+| A | `radarr.media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+| A | `prowlarr.media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+| A | `qbit.media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+| A | `pyload.media.ejemplo.com` | `IP_DE_TU_SERVIDOR` |
+
+> **Consejo:** Si tu proveedor DNS lo soporta, puedes usar un registro wildcard (`*.media.ejemplo.com`) junto con el dominio raiz en lugar de entradas individuales.
+
+Ten en cuenta que qBittorrent usa el subdominio `qbit` (no `qbittorrent`). Si habilitas Bazarr durante la configuracion, agrega tambien una entrada para `bazarr.media.ejemplo.com`.
+
+## Instalacion
+
+Ejecuta el instalador y selecciona el modo de despliegue **VPS (Caddy)**:
+
+```bash
+npx create-mediabox
+```
+
+Se te pedira:
+
+- **Dominio base** -- tu dominio (por ejemplo, `media.ejemplo.com`)
+- **Email** -- usado para el registro de certificados Let's Encrypt
+
+El instalador genera:
+
+- Un `docker-compose.yml` donde todos los puertos de servicios estan vinculados a `127.0.0.1` (no expuestos directamente a internet)
+- Un contenedor de **Caddy** (`caddy:2-alpine`) configurado para terminar TLS y redirigir cada subdominio al servicio interno correcto
+- Un **Caddyfile** en `./config/caddy/Caddyfile`
+
+## Como Funciona
+
+```
+Internet
+  │
+  ▼
+Caddy (:80, :443)
+  ├── media.ejemplo.com           →  mcp-server:3000
+  ├── jellyfin.media.ejemplo.com  →  jellyfin:8096
+  ├── sonarr.media.ejemplo.com    →  sonarr:8989
+  ├── radarr.media.ejemplo.com    →  radarr:7878
+  ├── prowlarr.media.ejemplo.com  →  prowlarr:9696
+  ├── qbit.media.ejemplo.com     →  qbittorrent:8085
+  └── pyload.media.ejemplo.com   →  pyload:8000
+```
+
+Caddy obtiene y renueva automaticamente los certificados TLS de Let's Encrypt. Todo el trafico entre el cliente y Caddy esta cifrado. El trafico interno entre Caddy y los servicios permanece dentro de la red Docker `mediabox-net`.
+
+## Verificar el Despliegue
+
+Una vez que el DNS se haya propagado (puede tardar unos minutos), verifica el acceso HTTPS:
+
+```bash
+curl -I https://media.ejemplo.com          # Servidor MCP
+curl -I https://jellyfin.media.ejemplo.com  # Jellyfin
+```
+
+Deberias ver una respuesta `200` o `302` con TLS valido.
+
+## Notas de Seguridad
+
+- Todos los puertos de servicios estan vinculados a `127.0.0.1`, por lo que no son accesibles directamente desde internet
+- Solo los puertos 80 y 443 estan expuestos a traves de Caddy
+- Caddy gestiona la renovacion automatica de certificados -- no se requiere intervencion manual
+- Considera configurar un firewall (por ejemplo, `ufw`) para bloquear todos los puertos excepto 80, 443 y SSH

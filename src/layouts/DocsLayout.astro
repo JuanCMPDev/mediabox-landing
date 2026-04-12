@@ -1,0 +1,138 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+import DocsSidebar from '../components/docs/DocsSidebar.astro';
+import DocsTableOfContents from '../components/docs/DocsTableOfContents.astro';
+import DocsPagination from '../components/docs/DocsPagination.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  locale: string;
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { title, description, locale, headings } = Astro.props;
+const currentPath = Astro.url.pathname.replace(/\/$/, '');
+---
+
+<BaseLayout title={`${title} — Mediabox MCP Docs`} description={description} locale={locale}>
+  <Header locale={locale} />
+
+  <!-- Mobile docs nav button -->
+  <div class="lg:hidden fixed bottom-4 right-4 z-50 flex gap-2">
+    <button
+      id="docs-sidebar-btn"
+      class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-medium shadow-lg shadow-accent/25 transition-colors"
+      aria-label="Open navigation"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      Menu
+    </button>
+    <button
+      id="docs-toc-btn"
+      class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-bg-card border border-border-visible text-text-secondary text-sm font-medium shadow-lg transition-colors hover:text-text-primary"
+      aria-label="Table of contents"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h7" />
+      </svg>
+      TOC
+    </button>
+  </div>
+
+  <!-- Mobile sidebar overlay -->
+  <div id="docs-sidebar-overlay" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden" aria-hidden="true"></div>
+
+  <!-- Mobile sidebar drawer -->
+  <div id="docs-sidebar-drawer" class="fixed top-0 left-0 z-50 w-72 h-full bg-bg-primary border-r border-border-subtle transform -translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto">
+    <div class="flex items-center justify-between px-4 h-16 border-b border-border-subtle">
+      <span class="text-sm font-semibold text-text-primary">Navigation</span>
+      <button id="docs-sidebar-close" class="p-1.5 text-text-muted hover:text-text-primary transition-colors" aria-label="Close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <DocsSidebar locale={locale} currentPath={currentPath} mobile />
+  </div>
+
+  <!-- Mobile TOC overlay -->
+  <div id="docs-toc-overlay" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden" aria-hidden="true"></div>
+
+  <!-- Mobile TOC drawer -->
+  <div id="docs-toc-drawer" class="fixed top-0 right-0 z-50 w-72 h-full bg-bg-primary border-l border-border-subtle transform translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto">
+    <div class="flex items-center justify-between px-4 h-16 border-b border-border-subtle">
+      <span class="text-sm font-semibold text-text-primary">On this page</span>
+      <button id="docs-toc-close" class="p-1.5 text-text-muted hover:text-text-primary transition-colors" aria-label="Close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <DocsTableOfContents headings={headings} mobile />
+  </div>
+
+  <div class="mx-auto max-w-[90rem] px-4 sm:px-6 pt-24">
+    <div class="flex gap-4 lg:gap-8">
+      <!-- Desktop Sidebar -->
+      <DocsSidebar locale={locale} currentPath={currentPath} />
+
+      <!-- Main content -->
+      <main class="flex-1 min-w-0 py-8 pb-24 lg:pb-8">
+        <article class="docs-prose prose prose-invert max-w-none
+          prose-headings:font-semibold prose-headings:tracking-tight
+          prose-p:text-text-secondary prose-p:leading-relaxed
+          prose-li:text-text-secondary
+          prose-strong:text-text-primary
+          prose-code:text-highlight-hover prose-code:font-normal
+        ">
+          <h1 class="docs-title">{title}</h1>
+          <p class="docs-description">{description}</p>
+          <slot />
+        </article>
+
+        <DocsPagination locale={locale} currentPath={currentPath} />
+      </main>
+
+      <!-- Desktop Table of Contents -->
+      <DocsTableOfContents headings={headings} />
+    </div>
+  </div>
+
+  <Footer locale={locale} />
+</BaseLayout>
+
+<script>
+  function setupDrawer(btnId: string, closeId: string, overlayId: string, drawerId: string, openClass: string) {
+    const btn = document.getElementById(btnId);
+    const close = document.getElementById(closeId);
+    const overlay = document.getElementById(overlayId);
+    const drawer = document.getElementById(drawerId);
+    if (!btn || !close || !overlay || !drawer) return;
+
+    function open() {
+      overlay!.classList.remove('hidden');
+      drawer!.classList.remove(openClass);
+      document.body.style.overflow = 'hidden';
+    }
+    function shut() {
+      overlay!.classList.add('hidden');
+      drawer!.classList.add(openClass);
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', open);
+    close.addEventListener('click', shut);
+    overlay.addEventListener('click', shut);
+
+    // Close on link click inside drawer
+    drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  }
+
+  setupDrawer('docs-sidebar-btn', 'docs-sidebar-close', 'docs-sidebar-overlay', 'docs-sidebar-drawer', '-translate-x-full');
+  setupDrawer('docs-toc-btn', 'docs-toc-close', 'docs-toc-overlay', 'docs-toc-drawer', 'translate-x-full');
+</script>

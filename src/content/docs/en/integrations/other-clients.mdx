@@ -1,0 +1,83 @@
+---
+title: "Other MCP Clients"
+description: "Connect any MCP-compatible client to Mediabox MCP using Streamable HTTP transport and OAuth2 authentication."
+category: "integrations"
+order: 3
+locale: "en"
+draft: false
+---
+
+Mediabox MCP is not limited to Claude Desktop or Telegram. Any client that supports the **Model Context Protocol (MCP)** can connect to it.
+
+## Transport
+
+Mediabox MCP uses **Streamable HTTP** transport. The MCP endpoint is:
+
+```
+https://media.example.com/mcp
+```
+
+For local deployments:
+
+```
+http://localhost:3000/mcp
+```
+
+Replace with your actual `MCP_PUBLIC_URL` from the `.env` file. The MCP server runs on the **root domain** (not a subdomain).
+
+## Authentication
+
+The server requires **OAuth2** authentication. MCP-compatible clients that support OAuth2 will handle the authentication flow automatically -- the server advertises its OAuth2 metadata at:
+
+```
+https://media.example.com/.well-known/oauth-authorization-server
+```
+
+Access tokens expire after **24 hours** and refresh tokens after **30 days**. Clients with OAuth2 support will refresh tokens automatically.
+
+## Generic Client Configuration
+
+Most MCP clients accept a JSON configuration block:
+
+```json
+{
+  "mcpServers": {
+    "mediabox": {
+      "url": "https://media.example.com/mcp"
+    }
+  }
+}
+```
+
+The exact configuration format depends on your client. Refer to your client's documentation for specifics.
+
+## Manual Connection (Advanced)
+
+If your client requires manual HTTP requests, the MCP endpoint accepts standard Streamable HTTP:
+
+```bash
+# First, obtain an OAuth2 token through the authorization flow
+# Then use it in requests:
+curl -X POST https://media.example.com/mcp \
+  -H "Authorization: Bearer YOUR_OAUTH_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc": "2.0", "method": "tools/list", "id": 1}'
+```
+
+This returns the list of all 25 available tools with their schemas.
+
+## Compatible Clients
+
+Any client implementing the MCP specification with Streamable HTTP transport should work:
+
+- **Claude Desktop** -- see [Claude Desktop integration](/docs/integrations/claude-desktop)
+- **Claude Code** -- Anthropic's CLI tool
+- **Cursor** -- AI-powered code editor
+- **Custom clients** -- built with the [MCP SDK](https://modelcontextprotocol.io/)
+
+## Troubleshooting
+
+- **401 Unauthorized** -- your OAuth2 token is missing, expired, or invalid. Re-authenticate to obtain a fresh token.
+- **Connection refused** -- verify the MCP server is running (`docker ps` should show `mcp-server`) and the URL is correct.
+- **Tools not appearing** -- ensure the client supports **Streamable HTTP** transport (not just stdio-based MCP).
+- **Health check** -- verify the server is up with: `curl https://media.example.com/health`
