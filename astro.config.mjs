@@ -7,7 +7,7 @@ import sitemap from '@astrojs/sitemap';
 import icon from 'astro-icon';
 
 export default defineConfig({
-  site: 'https://mediabox-mcp.dev',
+  site: 'https://createmediabox.dev',
   output: 'static',
   i18n: {
     defaultLocale: 'en',
