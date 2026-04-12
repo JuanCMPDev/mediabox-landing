@@ -82,8 +82,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '');
       <DocsSidebar locale={locale} currentPath={currentPath} />
 
       <!-- Main content -->
-      <main class="flex-1 min-w-0 py-8 pb-24 lg:pb-8">
-        <article class="docs-prose prose prose-invert max-w-none
+      <main class="flex-1 min-w-0 overflow-hidden py-8 pb-24 lg:pb-8">
+        <article class="docs-prose prose prose-invert max-w-none overflow-hidden
           prose-headings:font-semibold prose-headings:tracking-tight
           prose-p:text-text-secondary prose-p:leading-relaxed
           prose-li:text-text-secondary
@@ -135,4 +135,13 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '');
 
   setupDrawer('docs-sidebar-btn', 'docs-sidebar-close', 'docs-sidebar-overlay', 'docs-sidebar-drawer', '-translate-x-full');
   setupDrawer('docs-toc-btn', 'docs-toc-close', 'docs-toc-overlay', 'docs-toc-drawer', 'translate-x-full');
+
+  // Wrap tables in scrollable container for mobile
+  document.querySelectorAll('.docs-prose table').forEach(table => {
+    if (table.parentElement?.classList.contains('table-scroll-wrapper')) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-scroll-wrapper';
+    table.parentNode!.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+  });
 </script>
