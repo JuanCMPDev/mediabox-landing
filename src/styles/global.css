@@ -192,6 +192,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.75rem;
   padding: 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .prose code:not(pre code) {
@@ -268,17 +270,36 @@ body {
   color: var(--color-text-secondary);
 }
 
-/* ── Table styling (proper spacing, borders, readability) ── */
-.docs-prose table {
+/* ── Table wrapper for mobile scroll ── */
+.docs-prose :where(table) {
+  display: block;
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
+}
+
+/* ── Table styling (proper spacing, borders, readability) ── */
+.docs-prose table {
+  min-width: 500px;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.875rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.75rem;
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .docs-prose table {
+    min-width: 0;
+    width: 100%;
+  }
+  .docs-prose :where(table) {
+    display: table;
+    overflow-x: visible;
+  }
 }
 
 .docs-prose thead {
