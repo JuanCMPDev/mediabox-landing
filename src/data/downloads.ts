@@ -18,9 +18,7 @@ export const RELEASES_PAGE_URL =
 
 export interface DownloadAsset {
   /** i18n key under `downloads.platforms.<id>` for label + hint copy. */
-  id:        'windows' | 'macos-arm' | 'macos-intel' | 'linux';
-  /** Lucide icon name. */
-  icon:      string;
+  id:        'windows' | 'macos' | 'linux';
   /** Brand colour for the platform card border / icon. */
   color:     string;
   /** File extension shown in the card chip. */
@@ -36,7 +34,6 @@ export interface DownloadAsset {
 export const downloads: DownloadAsset[] = [
   {
     id:        'windows',
-    icon:      'lucide:monitor',
     color:     '#0078d4',
     extension: '.msi',
     url:       `${ASSET_BASE}/Mediabox.OS_${BUNDLE_VERSION}_x64_en-US.msi`,
@@ -44,24 +41,17 @@ export const downloads: DownloadAsset[] = [
     size:      '~50 MB',
   },
   {
-    id:        'macos-arm',
-    icon:      'lucide:laptop',
+    // Tauri's `--target universal-apple-darwin` produces a single .dmg that
+    // runs natively on Apple Silicon and Intel Macs. Bigger than per-arch
+    // builds (carries both binaries) but spares the user from picking.
+    id:        'macos',
     color:     '#a78bfa',
     extension: '.dmg',
-    url:       `${ASSET_BASE}/Mediabox.OS_${BUNDLE_VERSION}_aarch64.dmg`,
-    size:      '~45 MB',
-  },
-  {
-    id:        'macos-intel',
-    icon:      'lucide:laptop',
-    color:     '#06b6d4',
-    extension: '.dmg',
-    url:       `${ASSET_BASE}/Mediabox.OS_${BUNDLE_VERSION}_x64.dmg`,
-    size:      '~45 MB',
+    url:       `${ASSET_BASE}/Mediabox.OS_${BUNDLE_VERSION}_universal.dmg`,
+    size:      '~85 MB',
   },
   {
     id:        'linux',
-    icon:      'lucide:terminal',
     color:     '#ffc230',
     extension: '.deb',
     url:       `${ASSET_BASE}/Mediabox.OS_${BUNDLE_VERSION}_amd64.deb`,

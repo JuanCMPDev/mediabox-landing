@@ -127,15 +127,10 @@ export default {
         subtitle: 'x64 · MSI installer',
         hint: 'Works on Windows 10 / 11 (64-bit). Use the .msi for unattended installs or the .exe (NSIS) for a guided installer.',
       },
-      'macos-arm': {
-        title: 'macOS · Apple Silicon',
-        subtitle: 'M1, M2, M3 · DMG',
-        hint: 'For Macs with Apple Silicon (M-series). Drag-and-drop install via the .dmg.',
-      },
-      'macos-intel': {
-        title: 'macOS · Intel',
-        subtitle: 'x86_64 · DMG',
-        hint: 'For Macs with Intel CPUs. Drag-and-drop install via the .dmg.',
+      macos: {
+        title: 'macOS',
+        subtitle: 'Universal · Apple Silicon + Intel',
+        hint: 'One .dmg that runs natively on M-series and Intel Macs. Drag the app to Applications.',
       },
       linux: {
         title: 'Linux · Debian/Ubuntu',

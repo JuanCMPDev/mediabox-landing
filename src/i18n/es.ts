@@ -127,15 +127,10 @@ export default {
         subtitle: 'x64 · instalador MSI',
         hint: 'Funciona en Windows 10 / 11 (64-bit). Usa el .msi para instalaciones desatendidas o el .exe (NSIS) para un instalador guiado.',
       },
-      'macos-arm': {
-        title: 'macOS · Apple Silicon',
-        subtitle: 'M1, M2, M3 · DMG',
-        hint: 'Para Macs con chips Apple (serie M). Instalación drag-and-drop desde el .dmg.',
-      },
-      'macos-intel': {
-        title: 'macOS · Intel',
-        subtitle: 'x86_64 · DMG',
-        hint: 'Para Macs con CPUs Intel. Instalación drag-and-drop desde el .dmg.',
+      macos: {
+        title: 'macOS',
+        subtitle: 'Universal · Apple Silicon + Intel',
+        hint: 'Un solo .dmg que corre nativo en Macs M-series e Intel. Arrastra la app a Aplicaciones.',
       },
       linux: {
         title: 'Linux · Debian/Ubuntu',
