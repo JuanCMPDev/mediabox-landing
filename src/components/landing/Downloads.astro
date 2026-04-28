@@ -1,0 +1,101 @@
+---
+import { Icon } from 'astro-icon/components';
+import { downloads, RELEASES_PAGE_URL, RELEASE_TAG } from '../../data/downloads';
+import { useTranslations, type Locale } from '../../i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const locale = (Astro.props.locale ?? 'en') as Locale;
+const t = useTranslations(locale);
+---
+
+<section id="downloads" class="relative py-20 sm:py-28 scroll-mt-24">
+  <div class="absolute inset-0 dot-grid opacity-40"></div>
+  <div class="absolute top-0 right-1/4 w-[400px] h-[300px] glow-cyan opacity-20"></div>
+
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6">
+    <!-- Section header -->
+    <div class="text-center mb-10 sm:mb-14">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent-hover border border-accent/20 mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+        {t.downloads.badge}
+      </span>
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight gradient-text">{t.downloads.title}</h2>
+      <p class="mt-3 sm:mt-4 text-base sm:text-lg text-text-secondary max-w-2xl mx-auto px-2">{t.downloads.subtitle}</p>
+    </div>
+
+    <!-- Platform grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {downloads.map((asset) => {
+        const platform = t.downloads.platforms[asset.id];
+        return (
+          <a
+            href={asset.url}
+            class="glass-card rounded-xl sm:rounded-2xl p-5 sm:p-6 group transition-all hover:border-border-hover hover:-translate-y-0.5 flex flex-col"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-10 h-10 rounded-lg flex items-center justify-center"
+                style={`background: ${asset.color}1a; border: 1px solid ${asset.color}33;`}
+              >
+                <Icon name={asset.icon} class="w-5 h-5" style={`color: ${asset.color}`} />
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm sm:text-base font-semibold text-text-primary truncate">{platform.title}</h3>
+                <p class="text-[11px] sm:text-xs text-text-muted">{platform.subtitle}</p>
+              </div>
+            </div>
+            <p class="text-xs sm:text-sm text-text-secondary leading-relaxed flex-1">{platform.hint}</p>
+            <div class="mt-4 flex items-center justify-between gap-3 pt-3 border-t border-border-subtle">
+              <span class="inline-flex items-center gap-1 text-[11px] font-mono text-text-muted">
+                <span class="px-1.5 py-0.5 rounded bg-white/5 border border-border-subtle">{asset.extension}</span>
+                <span>{asset.size}</span>
+              </span>
+              <span class="inline-flex items-center gap-1 text-xs font-medium text-accent-hover group-hover:text-accent transition-colors">
+                {t.downloads.download}
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </span>
+            </div>
+            {asset.altUrl && (
+              <a
+                href={asset.altUrl}
+                class="mt-2 text-[11px] text-text-muted hover:text-text-secondary text-center transition-colors"
+                onclick="event.stopPropagation()"
+              >
+                {t.downloads.altInstaller}
+              </a>
+            )}
+          </a>
+        );
+      })}
+    </div>
+
+    <!-- Footer note -->
+    <div class="mt-8 sm:mt-10 max-w-3xl mx-auto text-center">
+      <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+        <span class="text-text-secondary">{t.downloads.unsigned}</span>
+        {' '}
+        {t.downloads.unsignedDetail}
+      </p>
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs">
+        <a
+          href={RELEASES_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          {t.downloads.allReleases}
+        </a>
+        <span class="text-border-visible">·</span>
+        <span class="text-text-muted font-mono">{RELEASE_TAG}</span>
+      </div>
+    </div>
+  </div>
+</section>

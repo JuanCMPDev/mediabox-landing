@@ -31,6 +31,7 @@ export const toolCategories: ToolCategory[] = [
       { name: 'manage_library', description: 'Create library, trigger scan, refresh metadata', descriptionEs: 'Crear biblioteca, iniciar escaneo, refrescar metadatos' },
       { name: 'manage_files', description: 'List, move, or delete files and folders', descriptionEs: 'Listar, mover o eliminar archivos y carpetas' },
       { name: 'rename_episodes', description: 'Batch rename episodes to standard format', descriptionEs: 'Renombrar episodios en lote al formato estándar' },
+      { name: 'get_library_state', description: 'Cross-service snapshot combining Jellyfin and *arr data', descriptionEs: 'Snapshot multi-servicio combinando datos de Jellyfin y *arr' },
       { name: 'fix_subtitles', description: 'Convert ASS/SSA subtitles to SRT in MKV files', descriptionEs: 'Convertir subtítulos ASS/SSA a SRT en archivos MKV' },
     ],
   },
@@ -44,6 +45,8 @@ export const toolCategories: ToolCategory[] = [
       { name: 'series_remove', description: 'Remove a series from Sonarr', descriptionEs: 'Eliminar una serie de Sonarr' },
       { name: 'series_releases', description: 'Search available torrent releases for episodes', descriptionEs: 'Buscar releases de torrents disponibles para episodios' },
       { name: 'series_grab', description: 'Download specific release with duplicate prevention', descriptionEs: 'Descargar release específico con prevención de duplicados' },
+      { name: 'series_import', description: 'Manually import already-downloaded episode files into Sonarr', descriptionEs: 'Importar manualmente archivos de episodios ya descargados a Sonarr' },
+      { name: 'series_rescan', description: 'Rescan a series folder so Sonarr picks up new files', descriptionEs: 'Reescanear la carpeta de una serie para que Sonarr detecte archivos nuevos' },
     ],
   },
   {
@@ -55,7 +58,9 @@ export const toolCategories: ToolCategory[] = [
       { name: 'movie_status', description: 'View monitored movies, queue, or download history', descriptionEs: 'Ver películas monitoreadas, cola o historial de descargas' },
       { name: 'movie_remove', description: 'Remove a movie from Radarr', descriptionEs: 'Eliminar una película de Radarr' },
       { name: 'movie_releases', description: 'Search available torrent releases for a movie', descriptionEs: 'Buscar releases de torrents disponibles para una película' },
-      { name: 'movie_grab', description: 'Download specific release with duplicate prevention', descriptionEs: 'Descargar release específico con prevenci��n de duplicados' },
+      { name: 'movie_grab', description: 'Download specific release with duplicate prevention', descriptionEs: 'Descargar release específico con prevención de duplicados' },
+      { name: 'movie_import', description: 'Manually import already-downloaded movie files into Radarr', descriptionEs: 'Importar manualmente archivos de películas ya descargados a Radarr' },
+      { name: 'movie_rescan', description: 'Rescan a movie folder so Radarr picks up new files', descriptionEs: 'Reescanear la carpeta de una película para que Radarr detecte archivos nuevos' },
     ],
   },
   {
