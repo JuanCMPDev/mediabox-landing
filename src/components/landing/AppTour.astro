@@ -1,0 +1,57 @@
+---
+import AppTourCarousel from './AppTourCarousel.tsx';
+import Lightbox from '../ui/Lightbox.tsx';
+import { useTranslations, type Locale } from '../../i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const locale = (Astro.props.locale ?? 'en') as Locale;
+const t = useTranslations(locale);
+
+const slides = (['stack', 'chat', 'choices', 'releases'] as const).map((id) => {
+  const copy = t.tour.slides[id];
+  const srcMap: Record<typeof id, string> = {
+    stack:    '/screenshots/dashboard-active.png',
+    chat:     '/screenshots/chat-tools.png',
+    choices:  '/screenshots/chat-choices.png',
+    releases: '/screenshots/chat-releases.png',
+  };
+  return {
+    id,
+    src:         srcMap[id],
+    window:      copy.window,
+    title:       copy.title,
+    description: copy.description,
+    tag:         copy.tag,
+  };
+});
+---
+
+<section id="tour" class="relative py-20 sm:py-28 scroll-mt-24">
+  <div class="absolute inset-0 dot-grid opacity-40"></div>
+  <div class="absolute top-1/3 left-1/4 w-[500px] h-[400px] glow-violet opacity-15"></div>
+
+  <div class="relative mx-auto max-w-6xl px-4 sm:px-6">
+    <!-- Section header -->
+    <div class="text-center mb-10 sm:mb-14">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent-hover border border-accent/20 mb-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+        {t.tour.badge}
+      </span>
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight gradient-text">{t.tour.title}</h2>
+      <p class="mt-3 sm:mt-4 text-base sm:text-lg text-text-secondary max-w-2xl mx-auto px-2">{t.tour.subtitle}</p>
+    </div>
+
+    <AppTourCarousel slides={slides} client:visible />
+
+    <!-- Click hint -->
+    <p class="mt-4 text-center text-[11px] sm:text-xs text-text-muted">
+      {t.tour.clickHint}
+    </p>
+  </div>
+</section>
+
+<!-- Global lightbox: listens for clicks on any [data-lightbox-src] element -->
+<Lightbox client:idle />

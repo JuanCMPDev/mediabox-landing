@@ -28,7 +28,7 @@ export default defineConfig({
           'arrow-right', 'github', 'menu', 'x', 'search',
           'chevron-right', 'chevron-down', 'external-link',
           'copy', 'check', 'globe-2', 'zap', 'layers',
-          'monitor', 'cloud', 'home', 'book-open', 'laptop',
+          'monitor', 'cloud', 'home', 'book-open',
         ],
       },
     }),

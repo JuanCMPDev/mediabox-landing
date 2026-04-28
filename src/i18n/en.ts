@@ -8,11 +8,22 @@ export default {
     badge: 'Open Source MCP Server',
     title: 'AI-Powered Media Server',
     titleAccent: 'Management',
-    description: 'Control your entire media library with natural language. Deploy Jellyfin, Sonarr, Radarr, and more — a complete self-hosted stack fully managed by AI through 30 MCP tools, with a Desktop App and a one-command CLI.',
+    description: 'Control your entire media library with natural language. A polished Desktop App with a built-in setup wizard, dashboard, and AI chat — or a one-command CLI for headless servers. Both drive the same stack of 30 MCP tools.',
     cta: 'Get Started',
     ctaSecondary: 'View on GitHub',
-    install: 'Get started in seconds',
-    orDownload: 'Or download the Desktop App ↓',
+    install: {
+      desktop: {
+        tab:            'Desktop App',
+        blurb:          'Native installer with a built-in wizard, dashboard, and AI chat.',
+        download:       'Download',
+        detecting:      'beta',
+        otherPlatforms: 'See all platforms ↓',
+      },
+      cli: {
+        tab:   'CLI',
+        blurb: 'Headless install for VPS or server. Same wizard, no GUI.',
+      },
+    },
   },
   features: {
     title: 'Everything you need',
@@ -40,6 +51,38 @@ export default {
     security: {
       title: 'OAuth2 Security',
       description: 'Secure MCP server with OAuth2 authentication, API key management, and Docker network isolation.',
+    },
+  },
+  tour: {
+    badge: 'Mediabox OS — the desktop app',
+    title: 'Your entire media stack, one app',
+    subtitle: 'Mediabox OS deploys, monitors and lets you drive Jellyfin, Sonarr, Radarr, Prowlarr, qBittorrent, PyLoad and FlareSolverr — without ever opening five web UIs. The MCP server runs as a bundled sidecar, so there is nothing extra to install.',
+    clickHint: 'Click any thumbnail to switch · click the main image to expand',
+    slides: {
+      stack: {
+        tag:         'Stack overview',
+        window:      'Mediabox OS — Dashboard',
+        title:       'Nine services, one live view',
+        description: 'Now-playing pulled from Jellyfin, server health, downloads merged from qBittorrent and PyLoad, library counts straight from your *arr stack — all rolled up on a single dashboard. Nothing here is a mockup; it talks to the real services.',
+      },
+      chat: {
+        tag:         'AI assistant',
+        window:      'Mediabox OS — AI assistant',
+        title:       'Drive every service in plain English',
+        description: 'An optional assistant powered by OpenRouter or Google Gemini wraps all 30 MCP tools. Ask "what is the server status?" and it queries Jellyfin and the *arrs in parallel, then answers in Markdown with expandable tool-call chips so you can see what really happened.',
+      },
+      choices: {
+        tag:         'Smart disambiguation',
+        window:      'Mediabox OS — AI assistant',
+        title:       'No more typing IDs',
+        description: 'When a search returns multiple matches across Sonarr, Radarr or Prowlarr, the assistant renders clickable cards. Each click round-trips the full ID the next step needs — Sonarr seriesId, Radarr movieId, indexer guids — without you ever copy-pasting.',
+      },
+      releases: {
+        tag:         'From search to grab',
+        window:      'Mediabox OS — AI assistant',
+        title:       'Pick a release, the grab handles itself',
+        description: 'Score-sorted release options as cards: language, quality, seeders, indexer. The right click triggers a Radarr/Sonarr release POST and qBittorrent picks it up — the assistant polls the queue and reports the live status, no false positives.',
+      },
     },
   },
   architecture: {
