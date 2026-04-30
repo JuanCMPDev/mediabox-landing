@@ -49,8 +49,8 @@ export default {
       description: 'Red local, VPS con Caddy reverse proxy y auto-HTTPS, o Cloudflare Tunnel para servidores detrás de NAT.',
     },
     security: {
-      title: 'Seguridad OAuth2',
-      description: 'Servidor MCP seguro con autenticación OAuth2, gestión de API keys y aislamiento de red Docker.',
+      title: 'Acceso Protegido',
+      description: 'Acceso MCP protegido con OAuth, API keys internas, lista de orígenes permitidos y aislamiento de red Docker.',
     },
   },
   tour: {

@@ -14,7 +14,7 @@ Mediabox MCP se ejecuta como un stack multi-contenedor con Docker Compose. Esta 
 | Servicio | Imagen | Puerto Host | Descripcion |
 |---|---|---|---|
 | **Jellyfin** | `lscr.io/linuxserver/jellyfin` | 8096 | Servidor de streaming multimedia |
-| **MCP Server** | Compilado desde `./mcp-server` | 3000 | Servidor de herramientas de IA (25 herramientas MCP) |
+| **MCP Server** | `ghcr.io/juancmpdev/mediabox-mcp` | 3000 | Servidor de herramientas de IA (30 herramientas MCP) |
 | **Sonarr** | `lscr.io/linuxserver/sonarr` | 8989 | Gestion de series de TV |
 | **Radarr** | `lscr.io/linuxserver/radarr` | 7878 | Gestion de peliculas |
 | **qBittorrent** | `lscr.io/linuxserver/qbittorrent` | 8085 | Cliente BitTorrent |
@@ -26,10 +26,12 @@ Mediabox MCP se ejecuta como un stack multi-contenedor con Docker Compose. Esta 
 
 | Servicio | Imagen | Puerto | Descripcion |
 |---|---|---|---|
-| **Bot de Telegram** | Compilado desde `./mcp-telegram-client` | -- | Interfaz de Telegram para gestionar contenido multimedia por chat. Se habilita durante la configuracion del asistente. |
+| **Bot de Telegram** | `ghcr.io/juancmpdev/mediabox-telegram` | -- | Interfaz de Telegram para gestionar contenido multimedia por chat. Se habilita durante la configuracion del asistente. |
 | **Bazarr** | `lscr.io/linuxserver/bazarr` | 6767 | Descargador automatico de subtitulos. Se habilita durante la configuracion del asistente. |
 
 > Caddy (proxy inverso) y Cloudflared (cliente de tunnel) son agregados por el asistente al seleccionar los modos de despliegue VPS o Tunnel respectivamente. No estan presentes en el `docker-compose.yml` base.
+
+> El Compose generado usa imagenes GHCR por defecto. Cuando el CLI corre en modo local-build, compila el servidor MCP desde `packages/mcp-server/Dockerfile` y el bot de Telegram desde `packages/mcp-telegram-client/Dockerfile` dentro del monorepo.
 
 ## Puertos
 

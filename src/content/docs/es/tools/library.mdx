@@ -8,7 +8,7 @@ draft: false
 ---
 
 
-Estas cuatro herramientas gestionan bibliotecas, operaciones de archivos, renombrado de episodios en lote y conversión de subtítulos en tu servidor multimedia.
+Estas cinco herramientas gestionan bibliotecas, operaciones de archivos, renombrado de episodios en lote, estado multi-servicio y conversión de subtítulos en tu servidor multimedia.
 
 ---
 
@@ -72,6 +72,7 @@ Renombrar archivos de episodios al formato estándar de Jellyfin (`ShowName - S0
 | `showPath` | string | No | Ruta a la carpeta del show (ej. `'anime/Samurai X'`). Opcional si se proporciona `jellyfinItemId`. |
 | `jellyfinItemId` | string | No | ID del elemento en Jellyfin -- resuelve la ruta del archivo automáticamente. Opcional si se proporciona `showPath`. |
 | `seasonNumber` | number | No | Número de temporada a usar en los nombres de archivo. Por defecto `1`. |
+| `startEpisodeNumber` | number | No | Número de episodio inicial cuando los archivos deben numerarse de forma secuencial. Por defecto `1`. |
 | `dryRun` | boolean | No | Previsualizar cambios sin aplicarlos. Por defecto `true`. |
 
 ### Ejemplo de Uso
@@ -79,6 +80,22 @@ Renombrar archivos de episodios al formato estándar de Jellyfin (`ShowName - S0
 > "Previsualiza el renombrado de episodios en anime/Samurai X a 'Rurouni Kenshin'."
 
 > "Renombra todos los episodios del elemento abc123 a 'Breaking Bad' temporada 3, aplica los cambios."
+
+---
+
+## get_library_state
+
+Obtener un snapshot consolidado que combina conteos de bibliotecas en Jellyfin con el estado de Sonarr y Radarr. Úsalo cuando un cliente de IA necesite una vista rápida antes de decidir qué buscar, importar o limpiar.
+
+### Parámetros
+
+Esta herramienta no requiere parámetros.
+
+### Ejemplo de Uso
+
+> "Dame un snapshot del estado actual de la biblioteca."
+
+> "Revisa qué saben Jellyfin, Sonarr y Radarr sobre mi contenido."
 
 ---
 

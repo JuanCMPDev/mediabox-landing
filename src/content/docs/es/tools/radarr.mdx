@@ -8,7 +8,7 @@ draft: false
 ---
 
 
-Estas cinco herramientas gestionan películas a través de Radarr -- buscar películas, monitorear su estado, explorar releases disponibles y ejecutar descargas.
+Estas siete herramientas gestionan películas a través de Radarr -- buscar películas, monitorear su estado, explorar releases disponibles, ejecutar descargas, importar archivos manualmente y reescanear carpetas.
 
 ---
 
@@ -116,3 +116,42 @@ Descargar un release de torrent específico para una película. Cancela automát
 > "Descarga el release con GUID xyz789abc012 del indexador 3."
 
 > "Descarga el primer release de la lista para la película 87."
+
+---
+
+## movie_import
+
+Listar archivos de películas descargados que Radarr puede importar, o importar manualmente archivos específicos en una película.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `action` | string | No | Acción a realizar. Uno de: `list`, `import`. Por defecto `list`. |
+| `folder` | string | Sí | Carpeta a escanear o importar, normalmente bajo `/downloads`. |
+| `movieId` | number | No | ID de película en Radarr para importar. Requerido cuando los archivos no pueden asociarse automáticamente. |
+| `files` | object[] | Condicional | Archivos a importar cuando `action` es `import`. Cada item incluye `path`, `movieId` y `quality` opcional. |
+
+### Ejemplo de Uso
+
+> "Lista las películas que Radarr puede importar desde /downloads."
+
+> "Importa este archivo descargado en la película 87."
+
+---
+
+## movie_rescan
+
+Pedirle a Radarr que reescanee una carpeta de película, o todas las carpetas, para detectar archivos movidos o importados por fuera de Radarr.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `movieId` | number | No | ID de película en Radarr a reescanear. Omite este valor para reescanear todas las películas. |
+
+### Ejemplo de Uso
+
+> "Reescanea la película 87 en Radarr."
+
+> "Haz que Radarr detecte archivos nuevos de películas."

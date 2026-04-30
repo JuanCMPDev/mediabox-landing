@@ -37,18 +37,19 @@ The MCP server is the central hub that exposes all media management capabilities
 - **Express.js** -- HTTP server framework
 - **Streamable HTTP transport** -- MCP protocol transport layer at the `/mcp` endpoint
 - **OAuth2 authentication** -- secures the endpoint; tokens expire after 24 hours (access) and 30 days (refresh)
+- **Origin allowlist** -- protects browser-callable MCP and API endpoints with configured allowed origins
 - **Health endpoint** -- `/health` returns server status
 
 ### Tool Domains
 
-The MCP server provides **25 tools** organized into **6 domains**:
+The MCP server provides **30 tools** organized into **6 domains**:
 
 | Domain | Tools | Services Used | Description |
 | --- | --- | --- | --- |
 | **Jellyfin** | 4 | Jellyfin | Server status, activity logs, media search, show details |
-| **Library** | 4 | Jellyfin, filesystem | Library management, file operations, episode renaming, subtitle fixing |
-| **Sonarr** | 5 | Sonarr | TV series search, monitoring, releases, downloads |
-| **Radarr** | 5 | Radarr | Movie search, monitoring, releases, downloads |
+| **Library** | 5 | Jellyfin, filesystem, Sonarr, Radarr | Library management, file operations, episode renaming, state snapshots, subtitle fixing |
+| **Sonarr** | 7 | Sonarr | TV series search, monitoring, releases, downloads, imports, rescans |
+| **Radarr** | 7 | Radarr | Movie search, monitoring, releases, downloads, imports, rescans |
 | **Downloads** | 4 | PyLoad, qBittorrent, yt-dlp, aria2c | Add downloads, check status, direct downloads, cancel queues |
 | **Maintenance** | 3 | ffmpeg, filesystem, qBittorrent | Media optimization, server cleanup, job tracking |
 
@@ -56,7 +57,7 @@ The MCP server provides **25 tools** organized into **6 domains**:
 
 ### Background Job Management
 
-Long-running operations (file moves, media optimization, subtitle conversion) run as background jobs. The MCP server tracks their progress and reports status via the `check_jobs` tool. Each job has an ID, progress percentage, and ETA.
+Long-running operations (file moves, media optimization, subtitle conversion) run as background jobs. The MCP server reports their status via the `check_jobs` tool. Each job has an ID, status, message, start time, and optional result; some start responses also include an estimated duration.
 
 ## Docker Network
 

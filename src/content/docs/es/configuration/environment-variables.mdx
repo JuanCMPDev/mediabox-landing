@@ -47,8 +47,8 @@ Estas variables son necesarias dependiendo del modo de despliegue seleccionado d
 | Variable | Requerida | Por Defecto | Descripcion |
 |---|---|---|---|
 | `MCP_PUBLIC_URL` | Si | `http://localhost:3000` | URL publica del servidor MCP. Configurar con la URL de tu dominio al desplegar en modo VPS o Tunnel. |
-| `MCP_AUTH_SECRET` | Si | Generado automaticamente | Secreto hexadecimal de 32 caracteres usado para autenticacion OAuth2. Generado automaticamente por el asistente. |
 | `INTERNAL_API_KEY` | Si | Generado automaticamente | Clave API interna para comunicacion entre servicios (por ejemplo, bot de Telegram al servidor MCP). |
+| `ALLOWED_ORIGINS` | No | `MCP_PUBLIC_URL` | Origenes de navegador, separados por comas, autorizados para llamar endpoints protegidos MCP/API. El servidor tambien permite localhost y origenes de la app Tauri para uso local. |
 
 ## Integracion con Telegram (Opcional)
 
@@ -61,18 +61,18 @@ Estas variables solo son necesarias si habilitas el bot de Telegram durante la c
 
 ## Proveedor de LLM (Opcional)
 
-Estas variables configuran el LLM usado por el **bot de Telegram** para interpretar comandos en lenguaje natural y llamar a las herramientas MCP.
+Estas variables configuran el LLM usado por el **chat de la App de Escritorio** y el **bot de Telegram** opcional para interpretar comandos en lenguaje natural y llamar a las herramientas MCP.
 
 | Variable | Requerida | Por Defecto | Descripcion |
 |---|---|---|---|
-| `LLM_PROVIDER` | Condicional | -- | Proveedor de LLM para el bot de Telegram. Soportados: `openrouter`, `google`. Requerido si el bot de Telegram esta habilitado. |
-| `LLM_MODEL` | No | `openai/gpt-4o` | Identificador del modelo (solo para OpenRouter). Ejemplos: `openai/gpt-4o`, `anthropic/claude-sonnet-4`. |
+| `LLM_PROVIDER` | Condicional | -- | Proveedor de LLM para el chat de la app o el bot de Telegram. Soportados: `openrouter`, `google`. Requerido cuando cualquiera de esas superficies esta habilitada. |
+| `LLM_MODEL` | No | Valor por defecto del proveedor | Override opcional del modelo. Ejemplos: `openai/gpt-4o`, `anthropic/claude-sonnet-4`, `gemini-2.0-flash`. |
 | `OPENROUTER_API_KEY` | Condicional | -- | Clave API de OpenRouter. Requerida cuando `LLM_PROVIDER=openrouter`. |
 | `GOOGLE_AI_API_KEY` | Condicional | -- | Clave API de Google AI (Gemini). Requerida cuando `LLM_PROVIDER=google`. |
 
 ## Ejemplo de Archivo `.env`
 
-```env
+```text
 # Despliegue
 DEPLOYMENT_MODE=local
 TZ=America/Mexico_City
@@ -93,8 +93,8 @@ PYLOAD_PASSWORD=pyload
 
 # Servidor MCP
 MCP_PUBLIC_URL=http://localhost:3000
-MCP_AUTH_SECRET=
 INTERNAL_API_KEY=
+ALLOWED_ORIGINS=http://localhost:3000
 
 # Telegram (opcional)
 # TELEGRAM_BOT_TOKEN=123456:ABC-DEF
@@ -107,5 +107,6 @@ INTERNAL_API_KEY=
 ## Notas
 
 - Las claves API de Jellyfin, Sonarr y Radarr son **generadas automaticamente por cada servicio** en el primer arranque. El asistente de configuracion las extrae automaticamente. Para la [configuracion manual](/es/docs/getting-started/manual-setup), extraelas de los archivos XML de configuracion.
-- `MCP_AUTH_SECRET` e `INTERNAL_API_KEY` se generan automaticamente como cadenas hexadecimales de 32 caracteres por el asistente. Para configuracion manual, generalos con: `openssl rand -hex 32`
+- `INTERNAL_API_KEY` se genera automaticamente como cadena hexadecimal de 32 caracteres por el asistente. Para configuracion manual, generala con: `openssl rand -hex 32`
+- `ALLOWED_ORIGINS` debe incluir los origenes de navegador que necesitan llamar endpoints protegidos. El Compose generado lo deja por defecto en `MCP_PUBLIC_URL`.
 - Despues de cambiar cualquier variable, recrea los contenedores afectados: `docker compose up -d --force-recreate <servicio>`

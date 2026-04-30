@@ -8,7 +8,7 @@ draft: false
 ---
 
 
-These four tools handle library management, file operations, batch episode renaming, and subtitle conversion within your media server.
+These five tools handle library management, file operations, batch episode renaming, cross-service state snapshots, and subtitle conversion within your media server.
 
 ---
 
@@ -72,6 +72,7 @@ Rename episode files to Jellyfin standard format (`ShowName - S01E01.ext`). Sear
 | `showPath` | string | No | Path to show folder (e.g. `'anime/Samurai X'`). Optional if `jellyfinItemId` is provided. |
 | `jellyfinItemId` | string | No | Jellyfin item ID -- resolves the file path automatically. Optional if `showPath` is provided. |
 | `seasonNumber` | number | No | Season number to use in filenames. Defaults to `1`. |
+| `startEpisodeNumber` | number | No | Episode number to start from when filenames need sequential numbering. Defaults to `1`. |
 | `dryRun` | boolean | No | Preview changes without applying. Defaults to `true`. |
 
 ### Usage Example
@@ -79,6 +80,22 @@ Rename episode files to Jellyfin standard format (`ShowName - S01E01.ext`). Sear
 > "Preview renaming episodes in anime/Samurai X to 'Rurouni Kenshin'."
 
 > "Rename all episodes of item abc123 to 'Breaking Bad' season 3, apply changes."
+
+---
+
+## get_library_state
+
+Get a consolidated snapshot that combines Jellyfin library counts with Sonarr and Radarr state. Use this when an AI client needs a quick overview before deciding what to search, import, or clean up.
+
+### Parameters
+
+This tool does not require parameters.
+
+### Usage Example
+
+> "Give me a snapshot of the current library state."
+
+> "Check what Jellyfin, Sonarr, and Radarr currently know about my media."
 
 ---
 

@@ -8,7 +8,7 @@ draft: false
 ---
 
 
-Estas cinco herramientas gestionan series de TV a través de Sonarr -- buscar nuevas series, monitorear su estado, explorar releases disponibles y ejecutar descargas.
+Estas siete herramientas gestionan series de TV a través de Sonarr -- buscar nuevas series, monitorear su estado, explorar releases disponibles, ejecutar descargas, importar archivos manualmente y reescanear carpetas.
 
 ---
 
@@ -138,3 +138,42 @@ Descargar un release de torrent específico para un episodio de serie. Cancela a
 > "Descarga el release con GUID abc123def456 del indexador 2."
 
 > "Descarga el segundo release de la lista para la serie 5, S04E06."
+
+---
+
+## series_import
+
+Listar archivos de episodios descargados que Sonarr puede importar, o importar manualmente archivos específicos en una serie.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `action` | string | No | Acción a realizar. Uno de: `list`, `import`. Por defecto `list`. |
+| `folder` | string | Sí | Carpeta a escanear o importar, normalmente bajo `/downloads`. |
+| `seriesId` | number | No | ID de serie en Sonarr para importar. Requerido cuando los archivos no pueden asociarse automáticamente. |
+| `files` | object[] | Condicional | Archivos a importar cuando `action` es `import`. Cada item incluye `path`, `episodeIds` y `quality` opcional. |
+
+### Ejemplo de Uso
+
+> "Lista los episodios que Sonarr puede importar desde /downloads."
+
+> "Importa estos episodios descargados en la serie 5."
+
+---
+
+## series_rescan
+
+Pedirle a Sonarr que reescanee la carpeta de una serie para detectar archivos movidos o importados por fuera de Sonarr.
+
+### Parámetros
+
+| Nombre | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `seriesId` | number | Sí | ID de serie en Sonarr a reescanear. |
+
+### Ejemplo de Uso
+
+> "Reescanea la serie 5 en Sonarr."
+
+> "Haz que Sonarr detecte archivos nuevos para esa serie."

@@ -49,8 +49,8 @@ export default {
       description: 'Local network, VPS with Caddy reverse proxy and auto-HTTPS, or Cloudflare Tunnel for home servers behind NAT.',
     },
     security: {
-      title: 'OAuth2 Security',
-      description: 'Secure MCP server with OAuth2 authentication, API key management, and Docker network isolation.',
+      title: 'Protected Access',
+      description: 'OAuth-protected MCP access, internal API keys, browser origin allowlisting, and Docker network isolation.',
     },
   },
   tour: {

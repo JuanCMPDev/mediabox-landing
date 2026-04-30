@@ -1,6 +1,6 @@
 ---
 title: "Tools Overview"
-description: "Summary of all 25 MCP tools available in Mediabox MCP, organized by category."
+description: "Summary of all 30 MCP tools available in Mediabox MCP, organized by category."
 category: "tools"
 order: 1
 locale: "en"
@@ -8,16 +8,16 @@ draft: false
 ---
 
 
-Mediabox MCP exposes **25 tools** through the Model Context Protocol, organized into six categories. Each tool can be invoked by any MCP-compatible AI client using natural language.
+Mediabox MCP exposes **30 tools** through the Model Context Protocol, organized into six categories. Each tool can be invoked by any MCP-compatible AI client using natural language.
 
 ## Tool Categories
 
 | Category | Tools | Description |
 |---|---|---|
 | [Jellyfin](/docs/tools/jellyfin) | 4 | Query server status, browse activity, search media, and inspect show details |
-| [Library](/docs/tools/library) | 4 | Manage libraries, files, episode naming, and subtitle conversion |
-| [Sonarr](/docs/tools/sonarr) | 5 | Search, monitor, and download TV series |
-| [Radarr](/docs/tools/radarr) | 5 | Search, monitor, and download movies |
+| [Library](/docs/tools/library) | 5 | Manage libraries, files, episode naming, subtitles, and cross-service state |
+| [Sonarr](/docs/tools/sonarr) | 7 | Search, monitor, download, import, and rescan TV series |
+| [Radarr](/docs/tools/radarr) | 7 | Search, monitor, download, import, and rescan movies |
 | [Downloads](/docs/tools/downloads) | 4 | Add downloads, check status, direct-download files, and cancel queued items |
 | [Maintenance](/docs/tools/maintenance) | 3 | Optimize media files, clean up the server, and track background jobs |
 
@@ -32,24 +32,29 @@ Mediabox MCP exposes **25 tools** through the Model Context Protocol, organized 
 | `manage_library` | Library | Create, scan, or refresh Jellyfin libraries |
 | `manage_files` | Library | List, move, or delete files on the media server |
 | `rename_episodes` | Library | Batch rename episode files to a standard naming format |
+| `get_library_state` | Library | Get a cross-service snapshot from Jellyfin, Sonarr, and Radarr |
 | `fix_subtitles` | Library | Convert ASS/SSA subtitles to SRT inside MKV containers |
 | `series_search` | Sonarr | Search for TV series and optionally add them to Sonarr |
 | `series_status` | Sonarr | View monitored series, calendar, missing episodes, queue, and history |
 | `series_remove` | Sonarr | Remove a series from Sonarr |
 | `series_releases` | Sonarr | Search available releases for a specific episode or season |
 | `series_grab` | Sonarr | Download a specific release and auto-cancel duplicates |
+| `series_import` | Sonarr | List or manually import downloaded episode files into Sonarr |
+| `series_rescan` | Sonarr | Rescan a series folder so Sonarr detects new files |
 | `movie_search` | Radarr | Search for movies and optionally add them to Radarr |
 | `movie_status` | Radarr | View monitored movies, download queue, and history |
 | `movie_remove` | Radarr | Remove a movie from Radarr |
 | `movie_releases` | Radarr | Search available releases for a movie |
 | `movie_grab` | Radarr | Download a specific release with duplicate prevention |
+| `movie_import` | Radarr | List or manually import downloaded movie files into Radarr |
+| `movie_rescan` | Radarr | Rescan movie folders so Radarr detects new files |
 | `download_add` | Downloads | Add URLs to the PyLoad download manager |
 | `download_status` | Downloads | Check queue status, organize completed downloads, or delete packages |
 | `download_direct` | Downloads | Download files via aria2c (HTTP) or yt-dlp (YouTube) |
 | `cancel_downloads` | Downloads | Cancel downloads across Sonarr, Radarr, torrent, or orphaned queues |
 | `optimize_media` | Maintenance | Analyze or strip audio/subtitle tracks from MKV files |
 | `cleanup_server` | Maintenance | Clear caches, temp files, and orphaned torrents |
-| `check_jobs` | Maintenance | List active and completed background jobs with progress |
+| `check_jobs` | Maintenance | List active and completed background jobs |
 
 ## Next Steps
 

@@ -8,7 +8,7 @@ draft: false
 ---
 
 
-These five tools manage movies through Radarr -- search for films, monitor their status, browse available releases, and trigger downloads.
+These seven tools manage movies through Radarr -- search for films, monitor their status, browse available releases, trigger downloads, manually import files, and rescan movie folders.
 
 ---
 
@@ -116,3 +116,42 @@ Download a specific torrent release for a movie. Automatically cancels any exist
 > "Grab the release with GUID xyz789abc012 from indexer 3."
 
 > "Download the first release from that list for movie 87."
+
+---
+
+## movie_import
+
+List downloaded movie files that Radarr can import, or manually import specific files into a movie.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `action` | string | No | Action to perform. One of: `list`, `import`. Defaults to `list`. |
+| `folder` | string | Yes | Folder to scan or import from, usually under `/downloads`. |
+| `movieId` | number | No | Radarr movie ID to import into. Required when importing files that cannot be auto-matched. |
+| `files` | object[] | Conditional | Files to import when `action` is `import`. Each item includes `path`, `movieId`, and optional `quality`. |
+
+### Usage Example
+
+> "List movie files Radarr can import from /downloads."
+
+> "Import this downloaded file into movie 87."
+
+---
+
+## movie_rescan
+
+Ask Radarr to rescan one movie folder, or all movie folders, so it detects files moved or imported outside Radarr.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `movieId` | number | No | Radarr movie ID to rescan. Omit to rescan all movies. |
+
+### Usage Example
+
+> "Rescan movie 87 in Radarr."
+
+> "Tell Radarr to detect new movie files."

@@ -28,7 +28,7 @@ cp .env.example .env
 
 Abre `.env` en tu editor y completa los valores requeridos:
 
-```env
+```text
 # Modo de despliegue: local o vps
 DEPLOYMENT_MODE=local
 
@@ -52,11 +52,13 @@ PYLOAD_PASSWORD=pyload
 
 # Servidor MCP
 MCP_PUBLIC_URL=http://localhost:3000
-MCP_AUTH_SECRET=cadena-hex-aleatoria-de-32-caracteres
 INTERNAL_API_KEY=cadena-hex-aleatoria-de-32-caracteres
+ALLOWED_ORIGINS=http://localhost:3000
 ```
 
 > Las claves API de Jellyfin, Sonarr y Radarr son **auto-generadas por cada servicio** en su primer arranque. Las extraeras en el paso 5.
+
+> Genera `INTERNAL_API_KEY` con `openssl rand -hex 32` si no usas el asistente de configuracion.
 
 Para una lista completa de variables, consulta [Variables de Entorno](/es/docs/configuration/environment-variables).
 
@@ -90,7 +92,7 @@ Alternativamente, encuentra las claves API en la interfaz web de cada servicio e
 
 Actualiza tu archivo `.env` con las claves extraidas:
 
-```env
+```text
 JELLYFIN_API_KEY=clave-extraida
 SONARR_API_KEY=clave-extraida
 RADARR_API_KEY=clave-extraida

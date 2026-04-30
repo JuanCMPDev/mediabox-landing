@@ -8,7 +8,7 @@ draft: false
 ---
 
 
-These five tools manage TV series through Sonarr -- search for new shows, monitor their status, browse available releases, and trigger downloads.
+These seven tools manage TV series through Sonarr -- search for new shows, monitor their status, browse available releases, trigger downloads, manually import files, and rescan series folders.
 
 ---
 
@@ -138,3 +138,42 @@ Download a specific torrent release for a series episode. Automatically cancels 
 > "Grab the release with GUID abc123def456 from indexer 2."
 
 > "Download that second release from the list for series 5, S04E06."
+
+---
+
+## series_import
+
+List downloaded episode files that Sonarr can import, or manually import specific files into a series.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `action` | string | No | Action to perform. One of: `list`, `import`. Defaults to `list`. |
+| `folder` | string | Yes | Folder to scan or import from, usually under `/downloads`. |
+| `seriesId` | number | No | Sonarr series ID to import into. Required when importing files that cannot be auto-matched. |
+| `files` | object[] | Conditional | Files to import when `action` is `import`. Each item includes `path`, `episodeIds`, and optional `quality`. |
+
+### Usage Example
+
+> "List episode files Sonarr can import from /downloads."
+
+> "Import these downloaded episodes into series 5."
+
+---
+
+## series_rescan
+
+Ask Sonarr to rescan a series folder so it detects files that were moved or imported outside Sonarr.
+
+### Parameters
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `seriesId` | number | Yes | Sonarr series ID to rescan. |
+
+### Usage Example
+
+> "Rescan series 5 in Sonarr."
+
+> "Tell Sonarr to detect new files for that show."

@@ -37,18 +37,19 @@ El servidor MCP es el eje central que expone todas las capacidades de gestion mu
 - **Express.js** -- framework de servidor HTTP
 - **Transporte Streamable HTTP** -- capa de transporte del protocolo MCP en el endpoint `/mcp`
 - **Autenticacion OAuth2** -- protege el endpoint; los tokens expiran despues de 24 horas (acceso) y 30 dias (refresco)
+- **Lista de origenes permitidos** -- protege endpoints MCP/API invocables desde navegador usando los origenes configurados
 - **Endpoint de salud** -- `/health` devuelve el estado del servidor
 
 ### Dominios de Herramientas
 
-El servidor MCP proporciona **25 herramientas** organizadas en **6 dominios**:
+El servidor MCP proporciona **30 herramientas** organizadas en **6 dominios**:
 
 | Dominio | Herramientas | Servicios Utilizados | Descripcion |
 | --- | --- | --- | --- |
 | **Jellyfin** | 4 | Jellyfin | Estado del servidor, registros de actividad, busqueda de contenido, detalles de series |
-| **Library** | 4 | Jellyfin, sistema de archivos | Gestion de biblioteca, operaciones de archivos, renombrado de episodios, correccion de subtitulos |
-| **Sonarr** | 5 | Sonarr | Busqueda de series, monitoreo, lanzamientos, descargas |
-| **Radarr** | 5 | Radarr | Busqueda de peliculas, monitoreo, lanzamientos, descargas |
+| **Library** | 5 | Jellyfin, sistema de archivos, Sonarr, Radarr | Gestion de biblioteca, operaciones de archivos, renombrado de episodios, snapshots de estado y correccion de subtitulos |
+| **Sonarr** | 7 | Sonarr | Busqueda de series, monitoreo, lanzamientos, descargas, importaciones y reescaneos |
+| **Radarr** | 7 | Radarr | Busqueda de peliculas, monitoreo, lanzamientos, descargas, importaciones y reescaneos |
 | **Downloads** | 4 | PyLoad, qBittorrent, yt-dlp, aria2c | Agregar descargas, verificar estado, descargas directas, cancelar colas |
 | **Maintenance** | 3 | ffmpeg, sistema de archivos, qBittorrent | Optimizacion de medios, limpieza del servidor, seguimiento de trabajos |
 
@@ -56,7 +57,7 @@ El servidor MCP proporciona **25 herramientas** organizadas en **6 dominios**:
 
 ### Gestion de Trabajos en Segundo Plano
 
-Las operaciones de larga duracion (movimiento de archivos, optimizacion de medios, conversion de subtitulos) se ejecutan como trabajos en segundo plano. El servidor MCP rastrea su progreso e informa el estado a traves de la herramienta `check_jobs`. Cada trabajo tiene un ID, porcentaje de progreso y tiempo estimado de finalizacion.
+Las operaciones de larga duracion (movimiento de archivos, optimizacion de medios, conversion de subtitulos) se ejecutan como trabajos en segundo plano. El servidor MCP informa su estado a traves de la herramienta `check_jobs`. Cada trabajo tiene ID, estado, mensaje, hora de inicio y resultado opcional; algunas respuestas de inicio tambien incluyen una duracion estimada.
 
 ## Red Docker
 

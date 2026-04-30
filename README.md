@@ -17,7 +17,7 @@ Landing page and documentation site for [Mediabox MCP](https://github.com/JuanCM
 - 44 documentation pages (22 EN + 22 ES)
 - i18n with automatic browser language detection (EN/ES)
 - Mobile-responsive with drawer navigation for docs
-- Pagefind-ready static search
+- Static bilingual docs with generated sitemap
 - Docker multi-stage build for production
 
 ## Development

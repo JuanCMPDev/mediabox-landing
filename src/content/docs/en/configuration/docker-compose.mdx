@@ -14,7 +14,7 @@ Mediabox MCP runs as a multi-container Docker Compose stack. This page explains 
 | Service | Image | Host Port | Description |
 |---|---|---|---|
 | **Jellyfin** | `lscr.io/linuxserver/jellyfin` | 8096 | Media streaming server |
-| **MCP Server** | Built from `./mcp-server` | 3000 | AI tool server (25 MCP tools) |
+| **MCP Server** | `ghcr.io/juancmpdev/mediabox-mcp` | 3000 | AI tool server (30 MCP tools) |
 | **Sonarr** | `lscr.io/linuxserver/sonarr` | 8989 | TV show management |
 | **Radarr** | `lscr.io/linuxserver/radarr` | 7878 | Movie management |
 | **qBittorrent** | `lscr.io/linuxserver/qbittorrent` | 8085 | BitTorrent client |
@@ -26,10 +26,12 @@ Mediabox MCP runs as a multi-container Docker Compose stack. This page explains 
 
 | Service | Image | Port | Description |
 |---|---|---|---|
-| **Telegram Bot** | Built from `./mcp-telegram-client` | -- | Telegram interface for managing media via chat. Enabled during wizard setup. |
+| **Telegram Bot** | `ghcr.io/juancmpdev/mediabox-telegram` | -- | Telegram interface for managing media via chat. Enabled during wizard setup. |
 | **Bazarr** | `lscr.io/linuxserver/bazarr` | 6767 | Automatic subtitle downloader. Enabled during wizard setup. |
 
 > Caddy (reverse proxy) and Cloudflared (tunnel client) are added by the wizard when selecting VPS or Tunnel deployment modes respectively. They are not present in the base `docker-compose.yml`.
+
+> The generated Compose file uses GHCR images by default. When the CLI is run in local-build mode, it builds the MCP server from `packages/mcp-server/Dockerfile` and the Telegram bot from `packages/mcp-telegram-client/Dockerfile` inside the monorepo.
 
 ## Ports
 

@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import Header from '../components/common/Header.astro';
 import Footer from '../components/common/Footer.astro';
+import AnimatedBackground from '../components/landing/AnimatedBackground';
 
 interface Props {
   title: string;
@@ -13,9 +14,12 @@ const { title, description, locale = 'en' } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description} locale={locale}>
+  <AnimatedBackground client:load />
   <Header locale={locale} />
-  <main class="pt-20">
+  <main class="relative z-10 pt-20">
     <slot />
   </main>
-  <Footer locale={locale} />
+  <div class="relative z-10">
+    <Footer locale={locale} />
+  </div>
 </BaseLayout>
