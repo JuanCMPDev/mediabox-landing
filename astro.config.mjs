@@ -6,9 +6,12 @@ import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import icon from 'astro-icon';
 
+import cloudflare from '@astrojs/cloudflare';
+
 export default defineConfig({
   site: 'https://createmediabox.dev',
   output: 'static',
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
@@ -16,6 +19,7 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
+
   integrations: [
     mdx(),
     react(),
@@ -33,7 +37,10 @@ export default defineConfig({
       },
     }),
   ],
+
   vite: {
     plugins: [tailwindcss()],
   },
+
+  adapter: cloudflare(),
 });
