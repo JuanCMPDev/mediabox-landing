@@ -38,6 +38,8 @@ El servidor MCP es el eje central que expone todas las capacidades de gestion mu
 - **Transporte Streamable HTTP** -- capa de transporte del protocolo MCP en el endpoint `/mcp`
 - **Autenticacion OAuth2** -- protege el endpoint; los tokens expiran despues de 24 horas (acceso) y 30 dias (refresco)
 - **Lista de origenes permitidos** -- protege endpoints MCP/API invocables desde navegador usando los origenes configurados
+- **Sandbox de rutas y URLs** -- rechaza rutas con traversal y destinos de descarga inseguros/privados antes de ejecutar herramientas
+- **Tokens de confirmacion** -- tokens de un solo uso emitidos por el servidor para forzar ejecucion destructiva en dos pasos
 - **Endpoint de salud** -- `/health` devuelve el estado del servidor
 
 ### Dominios de Herramientas
@@ -115,3 +117,12 @@ El servidor MCP utiliza **OAuth2** para clientes externos. El flujo funciona de 
 El proveedor OAuth2 utiliza un almacen **en memoria** -- los tokens se pierden al reiniciar el servidor, lo que requiere re-autenticacion. Los clientes compatibles con MCP gestionan esto automaticamente.
 
 El **bot de Telegram** no utiliza OAuth2. Se autentica mediante la variable de entorno `INTERNAL_API_KEY` ya que se ejecuta dentro de la misma red Docker.
+
+## Hardening de Seguridad 2.2
+
+La version 2.2 movio varias protecciones desde instrucciones de prompt hacia enforcement del lado servidor:
+
+- Los checks de origen de navegador protegen `/mcp`, `/api/dashboard`, `/api/chat` y `/api/setup`.
+- Las rutas de archivos y carpetas quedan aisladas bajo las raices de media y descargas; se rechaza traversal con `..`.
+- Las URLs de descarga se validan contra esquemas inseguros y destinos de red privada antes de entrar a la cola.
+- Las herramientas destructivas devuelven primero preview y `confirmToken`; solo ejecutan cuando se repiten los mismos argumentos con ese token dentro de 5 minutos.

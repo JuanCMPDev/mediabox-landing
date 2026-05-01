@@ -50,7 +50,7 @@ export default {
     },
     security: {
       title: 'Acceso Protegido',
-      description: 'Acceso MCP protegido con OAuth, API keys internas, lista de orígenes permitidos y aislamiento de red Docker.',
+      description: 'Acceso MCP protegido con OAuth, tokens de confirmación emitidos por el servidor, sandbox de rutas y URLs, lista de orígenes permitidos y aislamiento de red Docker.',
     },
   },
   tour: {
@@ -156,7 +156,7 @@ export default {
     description: 'Gestión de media server self-hosted con IA vía MCP.',
   },
   downloads: {
-    badge: 'Beta · App de Escritorio',
+    badge: 'v2.2 beta · App de Escritorio',
     title: 'Descarga Mediabox OS',
     subtitle: 'App de Escritorio nativa con asistente de configuración integrado, dashboard, chat con IA y logs de contenedores en vivo. Empaqueta el servidor MCP como sidecar — no necesitas instalar nada extra.',
     download: 'Descargar',

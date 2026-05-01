@@ -1,0 +1,54 @@
+---
+title: "Migrating to 2.2"
+description: "What changed in Mediabox MCP 2.2.0-beta.0 and what existing deployments need to do."
+category: "reference"
+order: 2
+locale: "en"
+draft: false
+---
+
+
+Mediabox MCP **2.2.0-beta.0** is a security hardening release. It closes the audit's P0/P1 findings around path traversal, DNS rebinding exposure, SSRF in download flows, Docker image distribution, and prompt-only confirmation for destructive tools.
+
+Most installs do not need manual changes.
+
+## Desktop App
+
+No action needed. The bundled sidecar forces `BIND_HOST=127.0.0.1` and allows only the Tauri webview origins plus localhost.
+
+## Docker Local Mode
+
+No action needed if you open the dashboard from `localhost` or `127.0.0.1`.
+
+If you open the dashboard from another LAN origin, add it to `.env`:
+
+```bash
+ALLOWED_ORIGINS=http://localhost:3000,http://192.168.1.10:3000
+```
+
+Then recreate the MCP server:
+
+```bash
+docker compose up -d --force-recreate mcp-server
+```
+
+## VPS or Cloudflare Tunnel
+
+No action needed if `MCP_PUBLIC_URL` matches the URL your browser uses. Generated Compose files seed `ALLOWED_ORIGINS` from `MCP_PUBLIC_URL`.
+
+## Custom Scripts and Clients
+
+Paths containing `..` now throw `PathSandboxError` in file, import, subtitle, optimization, organize, and direct-download flows. Use paths relative to the media root, paths under `downloads/`, or absolute paths under the configured media/download roots.
+
+Destructive tools are now two-step:
+
+1. Call the tool normally. The server returns `{ requiresConfirmation, confirmToken, preview, message }` and does not mutate anything.
+2. Repeat the same arguments with `confirmToken` within 5 minutes to execute.
+
+This applies to `manage_files(action:"delete")`, `cleanup_server(dryRun:false)`, and `optimize_media(action:"optimize")`.
+
+## Docker Images
+
+2.2 publishes multi-arch GHCR images on every `v*` tag. Generated Compose files use `IMAGE_TAG`, so pin production installs to a published tag such as `2.2.0-beta.0` instead of relying on `latest`.
+
+If Docker reports an authentication error when pulling Mediabox images, verify that the GHCR packages are public in GitHub Packages.

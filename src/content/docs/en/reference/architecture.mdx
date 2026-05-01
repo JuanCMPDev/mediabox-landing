@@ -38,6 +38,8 @@ The MCP server is the central hub that exposes all media management capabilities
 - **Streamable HTTP transport** -- MCP protocol transport layer at the `/mcp` endpoint
 - **OAuth2 authentication** -- secures the endpoint; tokens expire after 24 hours (access) and 30 days (refresh)
 - **Origin allowlist** -- protects browser-callable MCP and API endpoints with configured allowed origins
+- **Path and URL sandboxing** -- rejects traversal paths and unsafe/private download targets before tools execute
+- **Confirm tokens** -- server-issued, single-use tokens enforce two-step execution for destructive tools
 - **Health endpoint** -- `/health` returns server status
 
 ### Tool Domains
@@ -115,3 +117,12 @@ The MCP server uses **OAuth2** for external clients. The flow works as follows:
 The OAuth2 provider uses an **in-memory** store -- tokens are lost on server restart, requiring re-authentication. MCP-compatible clients handle this automatically.
 
 The **Telegram bot** does not use OAuth2. It authenticates via the `INTERNAL_API_KEY` environment variable since it runs within the same Docker network.
+
+## 2.2 Security Hardening
+
+Version 2.2 moved several safety checks from prompt guidance into server-side enforcement:
+
+- Browser-origin checks protect `/mcp`, `/api/dashboard`, `/api/chat`, and `/api/setup`.
+- File and folder inputs are sandboxed under the media and downloads roots; `..` traversal is rejected.
+- Download URLs are checked for unsafe schemes and private-network targets before queueing.
+- Destructive tools return a preview and `confirmToken` first, then execute only when the same arguments are repeated with that token within 5 minutes.

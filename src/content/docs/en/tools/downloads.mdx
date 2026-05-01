@@ -14,7 +14,7 @@ These four tools manage downloads across the Mediabox stack -- add URLs to PyLoa
 
 ## download_add
 
-Add one or more URLs to the PyLoad download manager as a new package. The package name becomes the subfolder name in the downloads directory.
+Add one or more URLs to the PyLoad download manager as a new package. The package name becomes the subfolder name in the downloads directory. Since 2.2, URLs are validated before enqueueing: non-HTTP schemes and private, loopback, link-local, RFC1918, CGNAT, and IPv6-ULA targets are rejected.
 
 ### Parameters
 
@@ -31,7 +31,7 @@ Add one or more URLs to the PyLoad download manager as a new package. The packag
 
 ## download_status
 
-PyLoad download manager. Check the queue, organize completed downloads into the Jellyfin library, or delete packages.
+PyLoad download manager. Check the queue, organize completed downloads into the Jellyfin library, or delete packages. `organize` paths are sandboxed under `/downloads`.
 
 ### Parameters
 
@@ -64,7 +64,7 @@ PyLoad download manager. Check the queue, organize completed downloads into the 
 
 ## download_direct
 
-Download a file from a direct URL (or YouTube/video site via yt-dlp) and organize it into the Jellyfin library. Use this instead of `download_add` for direct HTTP links, Google Drive, and YouTube-supported sites. Runs as a background job.
+Download a file from a direct URL (or YouTube/video site via yt-dlp) and organize it into the Jellyfin library. Use this instead of `download_add` for direct HTTP links, Google Drive, and YouTube-supported sites. Runs as a background job. Since 2.2, direct URLs go through the same SSRF guard and path sandbox as the rest of the download flow.
 
 ### Parameters
 

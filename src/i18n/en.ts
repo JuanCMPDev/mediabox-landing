@@ -50,7 +50,7 @@ export default {
     },
     security: {
       title: 'Protected Access',
-      description: 'OAuth-protected MCP access, internal API keys, browser origin allowlisting, and Docker network isolation.',
+      description: 'OAuth-protected MCP access, server-issued confirmation tokens, path and URL sandboxing, browser origin allowlisting, and Docker network isolation.',
     },
   },
   tour: {
@@ -156,7 +156,7 @@ export default {
     description: 'AI-powered self-hosted media server management via MCP.',
   },
   downloads: {
-    badge: 'Beta · Desktop App',
+    badge: 'v2.2 beta · Desktop App',
     title: 'Download Mediabox OS',
     subtitle: 'Native Desktop App with a built-in setup wizard, dashboard, AI chat, and live container logs. Bundles the MCP server as a sidecar — no extra install needed.',
     download: 'Download',

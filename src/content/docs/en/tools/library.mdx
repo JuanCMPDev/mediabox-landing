@@ -38,7 +38,7 @@ Create a library, trigger a scan, or refresh metadata for an item.
 
 ## manage_files
 
-List, move, or delete files and folders. Paths starting with `downloads/` access the downloads folder. All other paths are relative to the media volume.
+List, move, or delete files and folders. Paths starting with `downloads/` access the downloads folder. All other paths are relative to the media volume. Since 2.2, paths containing `..` are rejected by the server sandbox.
 
 ### Parameters
 
@@ -49,6 +49,11 @@ List, move, or delete files and folders. Paths starting with `downloads/` access
 | `sourcePaths` | string[] | Conditional | Array of source paths for move (e.g. `['downloads/file.mkv', 'tv/Show1']`). Required when `action` is `move`. |
 | `destFolder` | string | Conditional | Destination folder for move (e.g. `'movies/Movie Name'`). Required when `action` is `move`. |
 | `jellyfinItemId` | string | No | Jellyfin item ID to delete. Also removes files from disk and cleans up Sonarr/Radarr entries. Used when `action` is `delete`. |
+| `confirmToken` | string | Conditional | Server-issued token required to execute `action=delete`. Omit it on the first call to receive a preview and token. |
+
+### Destructive Confirmation
+
+`action=delete` is a two-step operation. The first call returns `{ requiresConfirmation, confirmToken, preview, message }` and does not delete anything. Repeat the same arguments with `confirmToken` within 5 minutes to execute.
 
 ### Usage Example
 
@@ -101,7 +106,7 @@ This tool does not require parameters.
 
 ## fix_subtitles
 
-Convert ASS/SSA subtitles to SRT in MKV files to prevent transcoding. Works on a single file or an entire folder (searched recursively). Large batches (more than 3 files) run as a background job.
+Convert ASS/SSA subtitles to SRT in MKV files to prevent transcoding. Works on a single file or an entire folder (searched recursively). Large batches (more than 3 files) run as a background job. Paths are sandboxed under the media/download roots.
 
 ### Parameters
 

@@ -66,6 +66,7 @@ export const docsNavigation: NavSection[] = [
     titleEs: 'Referencia',
     items: [
       { title: 'Architecture', titleEs: 'Arquitectura', href: '/docs/reference/architecture' },
+      { title: 'Migration 2.2', titleEs: 'Migracion 2.2', href: '/docs/reference/migration-2-2' },
       { title: 'Troubleshooting', titleEs: 'Solución de Problemas', href: '/docs/reference/troubleshooting' },
     ],
   },

@@ -38,7 +38,7 @@ Crear una biblioteca, iniciar un escaneo o refrescar metadatos de un elemento.
 
 ## manage_files
 
-Listar, mover o eliminar archivos y carpetas. Las rutas que comienzan con `downloads/` acceden a la carpeta de descargas. Todas las demás rutas son relativas al volumen multimedia.
+Listar, mover o eliminar archivos y carpetas. Las rutas que comienzan con `downloads/` acceden a la carpeta de descargas. Todas las demás rutas son relativas al volumen multimedia. Desde 2.2, el sandbox del servidor rechaza rutas que contengan `..`.
 
 ### Parámetros
 
@@ -49,6 +49,11 @@ Listar, mover o eliminar archivos y carpetas. Las rutas que comienzan con `downl
 | `sourcePaths` | string[] | Condicional | Array de rutas de origen para mover (ej. `['downloads/file.mkv', 'tv/Show1']`). Requerido cuando `action` es `move`. |
 | `destFolder` | string | Condicional | Carpeta de destino para mover (ej. `'movies/Movie Name'`). Requerido cuando `action` es `move`. |
 | `jellyfinItemId` | string | No | ID del elemento en Jellyfin a eliminar. También elimina archivos del disco y limpia entradas de Sonarr/Radarr. Se usa cuando `action` es `delete`. |
+| `confirmToken` | string | Condicional | Token emitido por el servidor requerido para ejecutar `action=delete`. Omítelo en la primera llamada para recibir preview y token. |
+
+### Confirmación Destructiva
+
+`action=delete` es una operación de dos pasos. La primera llamada devuelve `{ requiresConfirmation, confirmToken, preview, message }` y no elimina nada. Repite los mismos argumentos con `confirmToken` dentro de 5 minutos para ejecutar.
 
 ### Ejemplo de Uso
 
@@ -101,7 +106,7 @@ Esta herramienta no requiere parámetros.
 
 ## fix_subtitles
 
-Convertir subtítulos ASS/SSA a SRT en archivos MKV para evitar transcodificación. Funciona en un solo archivo o una carpeta completa (búsqueda recursiva). Lotes grandes (más de 3 archivos) se ejecutan como tarea en segundo plano.
+Convertir subtítulos ASS/SSA a SRT en archivos MKV para evitar transcodificación. Funciona en un solo archivo o una carpeta completa (búsqueda recursiva). Lotes grandes (más de 3 archivos) se ejecutan como tarea en segundo plano. Las rutas quedan aisladas bajo las raíces de media/descargas.
 
 ### Parámetros
 

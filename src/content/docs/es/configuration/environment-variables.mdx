@@ -33,6 +33,7 @@ Estas variables son necesarias dependiendo del modo de despliegue seleccionado d
 | `JELLYFIN_API_KEY` | Si | Extraida en el primer arranque | Clave API de Jellyfin. Generada automaticamente por Jellyfin durante la configuracion inicial, luego extraida por el asistente. |
 | `SONARR_API_KEY` | Si | Extraida en el primer arranque | Clave API de Sonarr. Generada automaticamente por Sonarr en el primer arranque, extraida de `config/sonarr/config.xml`. |
 | `RADARR_API_KEY` | Si | Extraida en el primer arranque | Clave API de Radarr. Generada automaticamente por Radarr en el primer arranque, extraida de `config/radarr/config.xml`. |
+| `PROWLARR_API_KEY` | Si | Extraida en el primer arranque | Clave API de Prowlarr. La usan la API de setup y el dashboard para verificar indexadores y apps. |
 | `QBIT_PASSWORD` | Si | -- | Contrasena para la interfaz web de qBittorrent (usuario: `admin`). Minimo 8 caracteres. Establecida por el usuario durante el asistente. |
 
 ## PyLoad
@@ -41,6 +42,15 @@ Estas variables son necesarias dependiendo del modo de despliegue seleccionado d
 |---|---|---|---|
 | `PYLOAD_USER` | No | `pyload` | Nombre de usuario para la interfaz web y autenticacion API de PyLoad. |
 | `PYLOAD_PASSWORD` | No | `pyload` | Contrasena para la interfaz web y autenticacion API de PyLoad. |
+| `PYLOAD_HOST_PORT` | No | `8001` | Puerto del host usado para abrir PyLoad desde el dashboard. El contenedor sigue escuchando internamente en `8000`. |
+
+## Servicios Opcionales
+
+| Variable | Requerida | Por Defecto | Descripcion |
+|---|---|---|---|
+| `BAZARR_ENABLED` | No | `false` | Habilita la integracion de estado de Bazarr cuando el servicio opcional esta presente. |
+| `BAZARR_URL` | No | `http://bazarr:6767` | URL interna de Bazarr. El sidecar de escritorio la mapea a `http://localhost:6767`. |
+| `FLARESOLVERR_URL` | No | `http://flaresolverr:8191` | URL interna de FlareSolverr usada para health checks y configuracion de proxy de indexadores. |
 
 ## Servidor MCP
 
@@ -48,6 +58,8 @@ Estas variables son necesarias dependiendo del modo de despliegue seleccionado d
 |---|---|---|---|
 | `MCP_PUBLIC_URL` | Si | `http://localhost:3000` | URL publica del servidor MCP. Configurar con la URL de tu dominio al desplegar en modo VPS o Tunnel. |
 | `INTERNAL_API_KEY` | Si | Generado automaticamente | Clave API interna para comunicacion entre servicios (por ejemplo, bot de Telegram al servidor MCP). |
+| `IMAGE_TAG` | No | Release actual | Tag de imagen GHCR usado por los archivos Docker Compose generados. Fijalo en produccion en lugar de depender de `latest`. |
+| `BIND_HOST` | No | `0.0.0.0` | Interfaz a la que se enlaza el servidor MCP. El sidecar de escritorio fuerza `127.0.0.1`; despliegues Docker normalmente mantienen el valor por defecto. |
 | `ALLOWED_ORIGINS` | No | `MCP_PUBLIC_URL` | Origenes de navegador, separados por comas, autorizados para llamar endpoints protegidos MCP/API. El servidor tambien permite localhost y origenes de la app Tauri para uso local. |
 
 ## Integracion con Telegram (Opcional)
@@ -85,15 +97,24 @@ TZ=America/Mexico_City
 JELLYFIN_API_KEY=
 SONARR_API_KEY=
 RADARR_API_KEY=
+PROWLARR_API_KEY=
 QBIT_PASSWORD=tu-contrasena-segura
 
 # PyLoad
 PYLOAD_USER=pyload
 PYLOAD_PASSWORD=pyload
+PYLOAD_HOST_PORT=8001
+
+# Servicios opcionales
+BAZARR_ENABLED=false
+# BAZARR_URL=http://bazarr:6767
+# FLARESOLVERR_URL=http://flaresolverr:8191
 
 # Servidor MCP
 MCP_PUBLIC_URL=http://localhost:3000
 INTERNAL_API_KEY=
+IMAGE_TAG=2.2.0-beta.0
+# BIND_HOST=0.0.0.0
 ALLOWED_ORIGINS=http://localhost:3000
 
 # Telegram (opcional)
@@ -106,7 +127,8 @@ ALLOWED_ORIGINS=http://localhost:3000
 
 ## Notas
 
-- Las claves API de Jellyfin, Sonarr y Radarr son **generadas automaticamente por cada servicio** en el primer arranque. El asistente de configuracion las extrae automaticamente. Para la [configuracion manual](/es/docs/getting-started/manual-setup), extraelas de los archivos XML de configuracion.
+- Las claves API de Jellyfin, Sonarr, Radarr y Prowlarr son **generadas automaticamente por cada servicio** en el primer arranque. El asistente de configuracion las extrae automaticamente. Para la [configuracion manual](/es/docs/getting-started/manual-setup), extraelas de los archivos XML de configuracion.
 - `INTERNAL_API_KEY` se genera automaticamente como cadena hexadecimal de 32 caracteres por el asistente. Para configuracion manual, generala con: `openssl rand -hex 32`
 - `ALLOWED_ORIGINS` debe incluir los origenes de navegador que necesitan llamar endpoints protegidos. El Compose generado lo deja por defecto en `MCP_PUBLIC_URL`.
+- `IMAGE_TAG` debe coincidir con un tag GHCR publicado, como `2.2.0-beta.0`, `2.2`, `latest` o `sha-<commit>`.
 - Despues de cambiar cualquier variable, recrea los contenedores afectados: `docker compose up -d --force-recreate <servicio>`

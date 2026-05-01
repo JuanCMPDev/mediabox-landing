@@ -4,12 +4,12 @@
  * filenames will resolve automatically.
  *
  * Note: the Tauri bundle filenames embed the version from `tauri.conf.json`
- * (currently `2.1.0`), which can drift from the git tag (`v2.1.0-beta.0`).
+ * (currently `2.2.0`), which can drift from the git tag (`v2.2.0-beta.0`).
  * `BUNDLE_VERSION` mirrors the bundle version, not the tag.
  */
 
-export const RELEASE_TAG    = 'v2.1.0-beta.0';
-export const BUNDLE_VERSION = '2.1.0';
+export const RELEASE_TAG    = 'v2.2.0-beta.0';
+export const BUNDLE_VERSION = '2.2.0';
 
 const ASSET_BASE = `https://github.com/JuanCMPDev/mediabox-mcp/releases/download/${RELEASE_TAG}`;
 

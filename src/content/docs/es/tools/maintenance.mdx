@@ -14,7 +14,7 @@ Estas tres herramientas gestionan el mantenimiento continuo del servidor -- opti
 
 ## optimize_media
 
-Analizar o eliminar pistas de audio y subtítulos no deseadas de archivos MKV para ahorrar espacio. Funciona en un solo archivo o una carpeta completa (lote). Lotes grandes (más de 3 archivos) se ejecutan como tarea en segundo plano.
+Analizar o eliminar pistas de audio y subtítulos no deseadas de archivos MKV para ahorrar espacio. Funciona en un solo archivo o una carpeta completa (lote). Lotes grandes (más de 3 archivos) se ejecutan como tarea en segundo plano. Las rutas quedan aisladas bajo las raíces de media/descargas.
 
 ### Parámetros
 
@@ -25,11 +25,14 @@ Analizar o eliminar pistas de audio y subtítulos no deseadas de archivos MKV pa
 | `keepAudioLangs` | string[] | No | Códigos de idioma de audio a conservar (ej. `["spa", "eng", "jpn"]`). Los demás se eliminan. Omitir para conservar todos. |
 | `keepSubLangs` | string[] | No | Códigos de idioma de subtítulos a conservar (ej. `["spa", "eng"]`). Los demás se eliminan. Omitir para conservar todos. |
 | `removeAllSubs` | boolean | No | Eliminar TODAS las pistas de subtítulos. Por defecto `false`. |
+| `confirmToken` | string | Condicional | Token emitido por el servidor requerido para ejecutar `action=optimize`. Omítelo en la primera llamada para recibir preview y token. |
 
 ### Acciones
 
 - **analyze** -- Listar todas las pistas de audio y subtítulos en el/los archivo(s) MKV objetivo, incluyendo idioma, códec, canales y metadatos de pista.
 - **optimize** -- Eliminar pistas de audio y subtítulos que no coincidan con las listas de conservación especificadas. Las pistas de video siempre se preservan. Los archivos donde nada cambiaría se omiten.
+
+`action=optimize` es una operación de dos pasos. La primera llamada devuelve preview y `confirmToken`; repite los mismos argumentos con ese token dentro de 5 minutos para aplicar cambios.
 
 ### Ejemplo de Uso
 
@@ -50,6 +53,11 @@ Limpiar el servidor: eliminar caché de Jellyfin, archivos temporales, descargas
 | Nombre | Tipo | Requerido | Descripción |
 |---|---|---|---|
 | `dryRun` | boolean | No | Previsualizar qué se limpiaría sin eliminar nada. Por defecto `true`. |
+| `confirmToken` | string | Condicional | Token emitido por el servidor requerido cuando `dryRun=false`. Omítelo en la primera llamada destructiva para recibir preview y token. |
+
+### Confirmación Destructiva
+
+`dryRun=false` es una operación de dos pasos. La primera llamada devuelve `{ requiresConfirmation, confirmToken, preview, message }` y no elimina nada. Repite los mismos argumentos con `confirmToken` dentro de 5 minutos para ejecutar.
 
 ### Ejemplo de Uso
 

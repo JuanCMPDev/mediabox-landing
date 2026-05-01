@@ -1,0 +1,54 @@
+---
+title: "Migrar a 2.2"
+description: "Que cambio en Mediabox MCP 2.2.0-beta.0 y que deben hacer los despliegues existentes."
+category: "reference"
+order: 2
+locale: "es"
+draft: false
+---
+
+
+Mediabox MCP **2.2.0-beta.0** es un release de hardening de seguridad. Cierra hallazgos P0/P1 de la auditoria: path traversal, exposicion a DNS rebinding, SSRF en flujos de descarga, distribucion Docker rota y confirmacion de herramientas destructivas basada solo en prompt.
+
+La mayoria de instalaciones no necesita cambios manuales.
+
+## App de Escritorio
+
+No necesitas hacer nada. El sidecar empaquetado fuerza `BIND_HOST=127.0.0.1` y permite solo los origenes de la webview Tauri mas localhost.
+
+## Docker en Modo Local
+
+No necesitas hacer nada si abres el dashboard desde `localhost` o `127.0.0.1`.
+
+Si abres el dashboard desde otro origen LAN, agregalo a `.env`:
+
+```bash
+ALLOWED_ORIGINS=http://localhost:3000,http://192.168.1.10:3000
+```
+
+Luego recrea el servidor MCP:
+
+```bash
+docker compose up -d --force-recreate mcp-server
+```
+
+## VPS o Cloudflare Tunnel
+
+No necesitas hacer nada si `MCP_PUBLIC_URL` coincide con la URL que usa tu navegador. Los Compose generados inicializan `ALLOWED_ORIGINS` desde `MCP_PUBLIC_URL`.
+
+## Scripts y Clientes Custom
+
+Las rutas que contienen `..` ahora lanzan `PathSandboxError` en flujos de archivos, importacion, subtitulos, optimizacion, organizacion y descarga directa. Usa rutas relativas a la raiz de media, rutas bajo `downloads/`, o rutas absolutas bajo las raices configuradas de media/descargas.
+
+Las herramientas destructivas ahora son de dos pasos:
+
+1. Llama la herramienta normalmente. El servidor devuelve `{ requiresConfirmation, confirmToken, preview, message }` y no modifica nada.
+2. Repite los mismos argumentos con `confirmToken` dentro de 5 minutos para ejecutar.
+
+Esto aplica a `manage_files(action:"delete")`, `cleanup_server(dryRun:false)` y `optimize_media(action:"optimize")`.
+
+## Imagenes Docker
+
+2.2 publica imagenes GHCR multi-arch en cada tag `v*`. Los Compose generados usan `IMAGE_TAG`, asi que en produccion conviene fijarlo a un tag publicado como `2.2.0-beta.0` en lugar de depender de `latest`.
+
+Si Docker devuelve un error de autenticacion al descargar imagenes de Mediabox, verifica que los packages GHCR esten publicos en GitHub Packages.

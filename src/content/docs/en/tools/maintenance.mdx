@@ -14,7 +14,7 @@ These three tools handle ongoing server maintenance -- optimize media files by s
 
 ## optimize_media
 
-Analyze or strip unwanted audio and subtitle tracks from MKV files to save space. Works on a single file or an entire folder (batch). Large batches (more than 3 files) run as a background job.
+Analyze or strip unwanted audio and subtitle tracks from MKV files to save space. Works on a single file or an entire folder (batch). Large batches (more than 3 files) run as a background job. Paths are sandboxed under the media/download roots.
 
 ### Parameters
 
@@ -25,11 +25,14 @@ Analyze or strip unwanted audio and subtitle tracks from MKV files to save space
 | `keepAudioLangs` | string[] | No | Audio language codes to keep (e.g. `["spa", "eng", "jpn"]`). Others are removed. Omit to keep all. |
 | `keepSubLangs` | string[] | No | Subtitle language codes to keep (e.g. `["spa", "eng"]`). Others are removed. Omit to keep all. |
 | `removeAllSubs` | boolean | No | Remove ALL subtitle tracks. Defaults to `false`. |
+| `confirmToken` | string | Conditional | Server-issued token required to execute `action=optimize`. Omit it on the first call to receive a preview and token. |
 
 ### Actions
 
 - **analyze** -- List all audio and subtitle tracks in the target MKV file(s), including language, codec, channels, and track metadata.
 - **optimize** -- Remove audio and subtitle tracks that do not match the specified keep lists. Video tracks are always preserved. Files where nothing would change are skipped.
+
+`action=optimize` is a two-step operation. The first call returns a preview and `confirmToken`; repeat the same arguments with that token within 5 minutes to apply changes.
 
 ### Usage Example
 
@@ -50,6 +53,11 @@ Clean up the server: remove Jellyfin cache info, temp files, orphan downloads, g
 | Name | Type | Required | Description |
 |---|---|---|---|
 | `dryRun` | boolean | No | Preview what would be cleaned without deleting anything. Defaults to `true`. |
+| `confirmToken` | string | Conditional | Server-issued token required when `dryRun=false`. Omit it on the first destructive call to receive a preview and token. |
+
+### Destructive Confirmation
+
+`dryRun=false` is a two-step operation. The first call returns `{ requiresConfirmation, confirmToken, preview, message }` and does not delete anything. Repeat the same arguments with `confirmToken` within 5 minutes to execute.
 
 ### Usage Example
 

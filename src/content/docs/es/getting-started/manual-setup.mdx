@@ -42,6 +42,7 @@ TZ=America/Mexico_City
 JELLYFIN_API_KEY=
 SONARR_API_KEY=
 RADARR_API_KEY=
+PROWLARR_API_KEY=
 
 # Contrasena de qBittorrent (minimo 8 caracteres)
 QBIT_PASSWORD=tu-contrasena-segura
@@ -49,14 +50,17 @@ QBIT_PASSWORD=tu-contrasena-segura
 # Credenciales de PyLoad
 PYLOAD_USER=pyload
 PYLOAD_PASSWORD=pyload
+PYLOAD_HOST_PORT=8001
 
 # Servidor MCP
 MCP_PUBLIC_URL=http://localhost:3000
 INTERNAL_API_KEY=cadena-hex-aleatoria-de-32-caracteres
+IMAGE_TAG=2.2.0-beta.0
+# BIND_HOST=0.0.0.0
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
-> Las claves API de Jellyfin, Sonarr y Radarr son **auto-generadas por cada servicio** en su primer arranque. Las extraeras en el paso 5.
+> Las claves API de Jellyfin, Sonarr, Radarr y Prowlarr son **auto-generadas por cada servicio** en su primer arranque. Las extraeras en el paso 5.
 
 > Genera `INTERNAL_API_KEY` con `openssl rand -hex 32` si no usas el asistente de configuracion.
 
@@ -86,6 +90,9 @@ grep -oP '<ApiKey>\K[^<]+' config/sonarr/config.xml
 
 # Clave API de Radarr
 grep -oP '<ApiKey>\K[^<]+' config/radarr/config.xml
+
+# Clave API de Prowlarr
+grep -oP '<ApiKey>\K[^<]+' config/prowlarr/config.xml
 ```
 
 Alternativamente, encuentra las claves API en la interfaz web de cada servicio en **Settings > General**.
@@ -96,6 +103,7 @@ Actualiza tu archivo `.env` con las claves extraidas:
 JELLYFIN_API_KEY=clave-extraida
 SONARR_API_KEY=clave-extraida
 RADARR_API_KEY=clave-extraida
+PROWLARR_API_KEY=clave-extraida
 ```
 
 Luego recrea el contenedor del servidor MCP para que tome las nuevas variables:

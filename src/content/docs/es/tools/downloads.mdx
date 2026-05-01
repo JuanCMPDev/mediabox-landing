@@ -14,7 +14,7 @@ Estas cuatro herramientas gestionan descargas en todo el stack de Mediabox -- ag
 
 ## download_add
 
-Agregar una o más URLs al gestor de descargas PyLoad como un nuevo paquete. El nombre del paquete se convierte en el nombre de la subcarpeta en el directorio de descargas.
+Agregar una o más URLs al gestor de descargas PyLoad como un nuevo paquete. El nombre del paquete se convierte en el nombre de la subcarpeta en el directorio de descargas. Desde 2.2, las URLs se validan antes de entrar a la cola: se rechazan esquemas no HTTP y destinos privados, loopback, link-local, RFC1918, CGNAT e IPv6-ULA.
 
 ### Parámetros
 
@@ -31,7 +31,7 @@ Agregar una o más URLs al gestor de descargas PyLoad como un nuevo paquete. El 
 
 ## download_status
 
-Gestor de descargas PyLoad. Consultar la cola, organizar descargas completadas en la biblioteca de Jellyfin o eliminar paquetes.
+Gestor de descargas PyLoad. Consultar la cola, organizar descargas completadas en la biblioteca de Jellyfin o eliminar paquetes. `organize` queda aislado bajo `/downloads`.
 
 ### Parámetros
 
@@ -64,7 +64,7 @@ Gestor de descargas PyLoad. Consultar la cola, organizar descargas completadas e
 
 ## download_direct
 
-Descargar un archivo desde una URL directa (o sitio de YouTube/video via yt-dlp) y organizarlo en la biblioteca de Jellyfin. Usa esto en lugar de `download_add` para enlaces HTTP directos, Google Drive y sitios soportados por YouTube. Se ejecuta como tarea en segundo plano.
+Descargar un archivo desde una URL directa (o sitio de YouTube/video via yt-dlp) y organizarlo en la biblioteca de Jellyfin. Usa esto en lugar de `download_add` para enlaces HTTP directos, Google Drive y sitios soportados por YouTube. Se ejecuta como tarea en segundo plano. Desde 2.2, las URLs directas pasan por la misma proteccion SSRF y sandbox de rutas que el resto del flujo de descargas.
 
 ### Parámetros
 

@@ -31,7 +31,9 @@ Mediabox MCP se ejecuta como un stack multi-contenedor con Docker Compose. Esta 
 
 > Caddy (proxy inverso) y Cloudflared (cliente de tunnel) son agregados por el asistente al seleccionar los modos de despliegue VPS o Tunnel respectivamente. No estan presentes en el `docker-compose.yml` base.
 
-> El Compose generado usa imagenes GHCR por defecto. Cuando el CLI corre en modo local-build, compila el servidor MCP desde `packages/mcp-server/Dockerfile` y el bot de Telegram desde `packages/mcp-telegram-client/Dockerfile` dentro del monorepo.
+> El Compose generado usa imagenes GHCR por defecto y lee el tag desde `IMAGE_TAG` (por ejemplo `2.2.0-beta.0`, `2.2`, `latest` o `sha-<commit>`). Cuando el CLI corre en modo local-build, compila el servidor MCP desde `packages/mcp-server/Dockerfile` y el bot de Telegram desde `packages/mcp-telegram-client/Dockerfile` dentro del monorepo.
+
+> Desde 2.2, los tags de release publican imagenes multi-arch `amd64` y `arm64` en GHCR antes de publicar el paquete CLI. Si un Docker pull falla por autenticacion, verifica que el package de GitHub este publico.
 
 ## Puertos
 
